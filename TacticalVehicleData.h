@@ -22,7 +22,7 @@ public:
     std::deque<TacticalVehicle> allVehicles;
 
     /** @brief View container holding pointers to vehicles that meet current filter criteria. */
-    std::vector<TacticalVehicle*> filteredVehicles;
+    std::vector<const TacticalVehicle*> filteredVehicles;
 
     // --- Persistence & I/O ---
     /** * @brief Parses vehicle data from a JSON resource.

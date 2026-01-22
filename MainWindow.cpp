@@ -184,7 +184,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     distanceSlider->setValues(0, 10000);
     teleGrid->addWidget(distanceSlider, 2, 1, 1, 2);
     teleGrid->addWidget(distanceInputMin = new QLineEdit("0 m"), 3, 1);
-    teleGrid->addWidget(distanceInputMax = new QLineEdit("10000 m"), 3, 2);
+    teleGrid->addWidget(distanceInputMax = new QLineEdit("MAX (No Limit)"), 3, 2);
 
     teleGrid->addWidget(new QLabel("Target (X, Y):"), 4, 0);
     QHBoxLayout *coordLayout = new QHBoxLayout();
@@ -348,7 +348,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
  */
 void MainWindow::filterFunction() {
     tacticalVehicleDb->filteredVehicles.clear();
-    for (unsigned long i = 0; i < tacticalVehicleDb->allVehicles.size(); i++) {
+    for (const auto& vehicle : tacticalVehicleDb->allVehicles) {
         bool capabilityMatch = true;
         bool callsignMatch = false;
         bool trackIdMatch = false;
@@ -364,22 +364,22 @@ void MainWindow::filterFunction() {
         bool affiliationMatch = false;
 
         // --- 1. Capabilities (Strict "AND" Logic) ---
-        if (cbHasSatCom->isChecked() && !tacticalVehicleDb->allVehicles[i].hasSatCom) {
+        if (cbHasSatCom->isChecked() && !vehicle.hasSatCom) {
             capabilityMatch = false;
         }
-        if (cbIsAmphibious->isChecked() && !tacticalVehicleDb->allVehicles[i].isAmphibious) {
+        if (cbIsAmphibious->isChecked() && !vehicle.isAmphibious) {
             capabilityMatch = false;
         }
-        if (cbIsUnmanned->isChecked() && !tacticalVehicleDb->allVehicles[i].isUnmanned) {
+        if (cbIsUnmanned->isChecked() && !vehicle.isUnmanned) {
             capabilityMatch = false;
         }
-        if (cbHasActiveDefense->isChecked() && !tacticalVehicleDb->allVehicles[i].hasActiveDefense) {
+        if (cbHasActiveDefense->isChecked() && !vehicle.hasActiveDefense) {
             capabilityMatch = false;
         }
 
         // --- 2. Identity (Standardized to use Button Text for Consistency) ---
         if (callsignSelectionPressed_Btn->isVisible()) {
-            if (tacticalVehicleDb->allVehicles[i].callsign == callsignSelectionPressed_Btn->text()) {
+            if (vehicle.callsign == callsignSelectionPressed_Btn->text()) {
                 callsignMatch = true;
             }
         } else {
@@ -387,7 +387,7 @@ void MainWindow::filterFunction() {
         }
 
         if (trackIdSelectionPressed_Btn->isVisible()) {
-            if (tacticalVehicleDb->allVehicles[i].trackId == trackIdSelectionPressed_Btn->text()) {
+            if (vehicle.trackId == trackIdSelectionPressed_Btn->text()) {
                 trackIdMatch = true;
             }
         } else {
@@ -396,7 +396,7 @@ void MainWindow::filterFunction() {
 
         // --- 3. Strategic Classifications ---
         if (domainButtonSelectionPressed_Btn->isVisible()) {
-            if (tacticalVehicleDb->allVehicles[i].domain == domainButtonSelectionPressed_Btn->text()) {
+            if (vehicle.domain == domainButtonSelectionPressed_Btn->text()) {
                 domainMatch = true;
             }
         } else {
@@ -404,7 +404,7 @@ void MainWindow::filterFunction() {
         }
 
         if (propulsionSelectionPressed_Btn->isVisible()) {
-            if (tacticalVehicleDb->allVehicles[i].propulsion == propulsionSelectionPressed_Btn->text()) {
+            if (vehicle.propulsion == propulsionSelectionPressed_Btn->text()) {
                 propulsionMatch = true;
             }
         } else {
@@ -412,7 +412,7 @@ void MainWindow::filterFunction() {
         }
 
         if (prioritySelectionPressed_Btn->isVisible()) {
-            if (tacticalVehicleDb->allVehicles[i].priority == prioritySelectionPressed_Btn->text()) {
+            if (vehicle.priority == prioritySelectionPressed_Btn->text()) {
                 priorityMatch = true;
             }
         } else {
@@ -421,7 +421,7 @@ void MainWindow::filterFunction() {
 
         // --- 4. Protection Levels ---
         if (protectionSelectionMinPressed_Btn->isVisible()) {
-            if (tacticalVehicleDb->allVehicles[i].protectionLevel >= protectionSelectionMinPressed_Btn->text().toInt()) {
+            if (vehicle.protectionLevel >= protectionSelectionMinPressed_Btn->text().toInt()) {
                 protectionMatchMin = true;
             }
         } else {
@@ -429,7 +429,7 @@ void MainWindow::filterFunction() {
         }
 
         if (protectionSelectionMaxPressed_Btn->isVisible()) {
-            if (tacticalVehicleDb->allVehicles[i].protectionLevel <= protectionSelectionMaxPressed_Btn->text().toInt()) {
+            if (vehicle.protectionLevel <= protectionSelectionMaxPressed_Btn->text().toInt()) {
                 protectionMatchMax = true;
             }
         } else {
@@ -437,23 +437,26 @@ void MainWindow::filterFunction() {
         }
 
         // --- 5. Telemetry Ranges (Cleaned Boundaries) ---
-        if (tacticalVehicleDb->allVehicles[i].fuelLevel >= fuelSlider->lowerValue()) {
+        if (vehicle.fuelLevel >= fuelSlider->lowerValue()) {
             fuelMatchMin = true;
         }
-        if (tacticalVehicleDb->allVehicles[i].fuelLevel <= fuelSlider->upperValue()) {
+        if (vehicle.fuelLevel <= fuelSlider->upperValue()) {
             fuelMatchMax = true;
         }
 
-        if (tacticalVehicleDb->allVehicles[i].distanceToTarget >= distanceSlider->lowerValue()) {
+        if (vehicle.distanceToTarget >= distanceSlider->lowerValue()) {
             distanceMatchMin = true;
         }
-        if (tacticalVehicleDb->allVehicles[i].distanceToTarget <= distanceSlider->upperValue()) {
+        if (distanceSlider->upperValue() >= 10000) {
+            distanceMatchMax = true;
+        }
+        else if (vehicle.distanceToTarget <= distanceSlider->upperValue()) {
             distanceMatchMax = true;
         }
 
         // --- 6. Affiliation ---
         if (affiliationButton->text() == "All Types" ||
-            tacticalVehicleDb->allVehicles[i].affiliation == affiliationButton->text()) {
+            vehicle.affiliation == affiliationButton->text()) {
             affiliationMatch = true;
         }
 
@@ -463,12 +466,12 @@ void MainWindow::filterFunction() {
             protectionMatchMax && fuelMatchMin && fuelMatchMax &&
             distanceMatchMin && distanceMatchMax && affiliationMatch) {
 
-            tacticalVehicleDb->filteredVehicles.push_back(&tacticalVehicleDb->allVehicles[i]);
+            tacticalVehicleDb->filteredVehicles.push_back(&vehicle);
         }
     }
 
     // --- UI UPDATE ONLY (Original Logic) ---
-    bool anyFilterActive = (cbHasSatCom->isChecked() || cbIsAmphibious->isChecked() ||
+    const bool anyFilterActive = (cbHasSatCom->isChecked() || cbIsAmphibious->isChecked() ||
                             cbIsUnmanned->isChecked() || cbHasActiveDefense->isChecked() ||
                             callsignSelectionPressed_Btn->isVisible() ||
                             trackIdSelectionPressed_Btn->isVisible() ||
@@ -637,11 +640,10 @@ void MainWindow::protectionMenuMinClicked(QAction* action) {
     for (QAction *act : protectionMenuMax->actions()) {
         act->setVisible(true);
     }
-    for (int lvl = 1; lvl < protectionButtonMin->text().toInt(); ++lvl) {
-        for (QAction* act : protectionMenuMax->actions()) {
-            if (act->text().toInt() == lvl) {
-                act->setVisible(false);
-            }
+    int minThreshold = protectionButtonMin->text().toInt();
+    for (QAction* act : protectionMenuMax->actions()) {
+        if (act->text().toInt() < minThreshold) {
+            act->setVisible(false);
         }
     }
     filterFunction();
@@ -689,6 +691,9 @@ void MainWindow::distanceSliderChanged(int x, int y) {
         distanceInputMax->setText("10000 m");
     } else {
         distanceInputMax->setText(QString::number(y) + " m");
+    }
+    if (y >= 10000) {
+        distanceInputMax->setText("MAX (No Limit)");
     }
     distanceInputMin->blockSignals(false);
     distanceInputMax->blockSignals(false);
@@ -766,7 +771,7 @@ void MainWindow::fuelInputMaxChanged(const QString &fuelString) {
  * Math and simulation logic for real-time asset tracking.
  */
 
-double MainWindow::calculateDistance(double vehX, double vehY) {
+double MainWindow::calculateDistance(double vehX, double vehY) const {
     double targetX = targetXLine->text().toDouble();
     double targetY = targetYLine->text().toDouble();
     double dx = targetX - vehX;
@@ -777,9 +782,9 @@ double MainWindow::calculateDistance(double vehX, double vehY) {
 void MainWindow::updateSimulation() {
     const double PI_CONST = 3.14159265358979323846;
     for (auto& v : tacticalVehicleDb->allVehicles) {
-        double currentSpeed = v.speed;
-        double rad = (v.heading - 90.0) * (PI_CONST / 180.0);
-        double distPerSecond = currentSpeed / 3.6;
+        const double currentSpeed = v.speed;
+        const double rad = (v.heading - 90.0) * (PI_CONST / 180.0);
+        const double distPerSecond = currentSpeed / 3.6;
         v.posX += distPerSecond * cos(rad);
         v.posY += distPerSecond * sin(rad);
         v.distanceToTarget = calculateDistance(v.posX, v.posY);
@@ -808,7 +813,7 @@ void MainWindow::sortByFuelAsc() {
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelAsc);
     } else {
-        std::sort(av.begin(), av.end(), [](auto& a, auto& b) { return TacticalVehicleData::sortByFuelAsc(&a, &b); });
+        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelAsc(&a, &b); });
         filterFunction();
     }
     sortButton->setText("Fuel: Critical first");
@@ -824,7 +829,7 @@ void MainWindow::sortByFuelDesc() {
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelDesc);
     } else {
-        std::sort(av.begin(), av.end(), [](auto& a, auto& b) { return TacticalVehicleData::sortByFuelDesc(&a, &b); });
+        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelDesc(&a, &b); });
         filterFunction();
     }
     sortButton->setText("Fuel: Full first");
@@ -840,7 +845,7 @@ void MainWindow::sortByPriorityAsc() {
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByPriorityAsc);
     } else {
-        std::sort(av.begin(), av.end(), [](auto& a, auto& b) { return TacticalVehicleData::sortByPriorityAsc(&a, &b); });
+        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByPriorityAsc(&a, &b); });
         filterFunction();
     }
     sortButton->setText("Priority (A-Z)");
@@ -856,7 +861,7 @@ void MainWindow::sortByPriorityDesc() {
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByPriorityDesc);
     } else {
-        std::sort(av.begin(), av.end(), [](auto& a, auto& b) { return TacticalVehicleData::sortByPriorityDesc(&a, &b); });
+        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByPriorityDesc(&a, &b); });
         filterFunction();
     }
     sortButton->setText("Priority (Z-A)");
@@ -872,7 +877,7 @@ void MainWindow::sortByClassificationAsc() {
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByClassificationAsc);
     } else {
-        std::sort(av.begin(), av.end(), [](auto& a, auto& b) { return TacticalVehicleData::sortByClassificationAsc(&a, &b); });
+        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByClassificationAsc(&a, &b); });
         filterFunction();
     }
     sortButton->setText("Classification (A-Z)");
@@ -888,7 +893,7 @@ void MainWindow::sortByClassificationDesc() {
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByClassificationDesc);
     } else {
-        std::sort(av.begin(), av.end(), [](auto& a, auto& b) { return TacticalVehicleData::sortByClassificationDesc(&a, &b); });
+        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByClassificationDesc(&a, &b); });
         filterFunction();
     }
     sortButton->setText("Classification (Z-A)");
@@ -904,7 +909,7 @@ void MainWindow::sortByDistanceAsc() {
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceAsc);
     } else {
-        std::sort(av.begin(), av.end(), [](auto& a, auto& b) { return TacticalVehicleData::sortByDistanceAsc(&a, &b); });
+        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceAsc(&a, &b); });
         filterFunction();
     }
     sortButton->setText("Distance: Closest first");
@@ -920,7 +925,7 @@ void MainWindow::sortByDistanceDesc() {
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceDesc);
     } else {
-        std::sort(av.begin(), av.end(), [](auto& a, auto& b) { return TacticalVehicleData::sortByDistanceDesc(&a, &b); });
+        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceDesc(&a, &b); });
         filterFunction();
     }
     sortButton->setText("Distance: Farthest first");
@@ -988,24 +993,24 @@ void MainWindow::printList() {
                             affiliationButton->text() != "All Types");
 
     if (anyFilterActive) {
-        for (unsigned long i = 0; i < tacticalVehicleDb->filteredVehicles.size(); i++) {
-            populateRow(tacticalVehicleDb->filteredVehicles[i]->callsign,
-                        tacticalVehicleDb->filteredVehicles[i]->type,
-                        tacticalVehicleDb->filteredVehicles[i]->trackId,
-                        tacticalVehicleDb->filteredVehicles[i]->fuelLevel,
-                        tacticalVehicleDb->filteredVehicles[i]->distanceToTarget,
-                        tacticalVehicleDb->filteredVehicles[i]->protectionLevel,
-                        tacticalVehicleDb->filteredVehicles[i]->affiliation);
+        for (const auto* vehicle : tacticalVehicleDb->filteredVehicles) {
+            populateRow(vehicle->callsign,
+                        vehicle->type,
+                        vehicle->trackId,
+                        vehicle->fuelLevel,
+                        vehicle->distanceToTarget,
+                        vehicle->protectionLevel,
+                        vehicle->affiliation);
         }
     } else {
-        for (unsigned long i = 0; i < tacticalVehicleDb->allVehicles.size(); i++) {
-            populateRow(tacticalVehicleDb->allVehicles[i].callsign,
-                        tacticalVehicleDb->allVehicles[i].type,
-                        tacticalVehicleDb->allVehicles[i].trackId,
-                        tacticalVehicleDb->allVehicles[i].fuelLevel,
-                        tacticalVehicleDb->allVehicles[i].distanceToTarget,
-                        tacticalVehicleDb->allVehicles[i].protectionLevel,
-                        tacticalVehicleDb->allVehicles[i].affiliation);
+        for (const auto& vehicle : tacticalVehicleDb->allVehicles) {
+            populateRow(vehicle.callsign,
+                        vehicle.type,
+                        vehicle.trackId,
+                        vehicle.fuelLevel,
+                        vehicle.distanceToTarget,
+                        vehicle.protectionLevel,
+                        vehicle.affiliation);
         }
     }
 }

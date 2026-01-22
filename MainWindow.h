@@ -155,7 +155,7 @@ private:
     // --- Internal Mathematical Helpers ---
     QTimer *simTimer;
     void updateSortStatus();
-    double calculateDistance(double vehX, double vehY);
+    double calculateDistance(double vehX, double vehY) const;
 };
 
 #endif // MAINWINDOW_H
