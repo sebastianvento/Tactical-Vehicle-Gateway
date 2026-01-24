@@ -348,6 +348,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
  * Core engine for processing vehicle data based on UI criteria.
  */
 void MainWindow::filterFunction() {
+    controller->applyFilter();
     controller->filteredVehicles.clear();
     for (const auto& vehicle : tacticalVehicleDb->allVehicles) {
         bool capabilityMatch = true;
