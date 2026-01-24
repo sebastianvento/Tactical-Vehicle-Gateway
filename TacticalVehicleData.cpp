@@ -32,7 +32,6 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
 
     // Reset database to ensure no stale data remains
     allVehicles.clear();
-    filteredVehicles.clear();
 
     QByteArray data = file.readAll();
     file.close();
