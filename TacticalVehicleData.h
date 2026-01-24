@@ -18,16 +18,18 @@ public:
     // --- Lifecycle ---
     TacticalVehicleData();
 
-    // --- Data Storage ---
-    /** @brief Master container owning all vehicle objects. */
-    std::deque<TacticalVehicle> allVehicles;
-
     // --- Persistence & I/O ---
     /**
      * @brief Parses vehicle data from a JSON resource.
      * @param path The file path or Qt resource path (e.g., ":/data/vehicles.json").
      */
     void loadVehiclesFromJson(const QString &path);
+
+    // Read-only access (UI-safe)
+    const std::deque<TacticalVehicle>& vehicles() const;
+
+    // Controlled mutable access (sorting / simulation)
+    std::deque<TacticalVehicle>& vehiclesMutable();
 
     // --- Static Sort Predicates ---
     // These functions are used as comparators for std::sort.
@@ -47,6 +49,12 @@ public:
     // Asset Classification Based
     static bool sortByClassificationAsc(const TacticalVehicle* a, const TacticalVehicle* b);
     static bool sortByClassificationDesc(const TacticalVehicle* a, const TacticalVehicle* b);
+
+private:
+    // --- Data Storage ---
+    /** @brief Master container owning all vehicle objects. */
+    std::deque<TacticalVehicle> allVehicles;
+
 };
 
 #endif // TACTICALVEHICLEDATA_H

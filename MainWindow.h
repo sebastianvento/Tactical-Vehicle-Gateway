@@ -3,7 +3,6 @@
 
 #include "TacticalVehicleController.h"
 #include <QWidget>
-#include <vector>
 
 // Forward declarations to optimize compilation times
 class QAction;

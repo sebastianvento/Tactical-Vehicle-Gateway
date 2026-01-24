@@ -1,6 +1,5 @@
 #include "TacticalVehicleController.h"
 #include "TacticalVehicleData.h"
-
 #include <cmath>
 
 /**
@@ -58,7 +57,7 @@ void TacticalVehicleController::applyFilter(
 {
     filteredVehicles.clear();
 
-    for (const auto& vehicle : data.allVehicles) {
+    for (const auto& vehicle : data.vehicles()) {
 
         // Default to permissive matching; constraints narrow results
         bool capabilityMatch     = true;
@@ -173,7 +172,7 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
 {
     constexpr double PI_CONST = 3.14159265358979323846;
 
-    for (auto& v : data.allVehicles) {
+    for (auto& v : data.vehiclesMutable()) {
 
         // Convert heading to radians (UI uses degrees)
         const double rad = (v.heading - 90.0) * (PI_CONST / 180.0);

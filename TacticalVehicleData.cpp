@@ -8,19 +8,29 @@
 /**
  * @class TacticalVehicleData
  * @brief Implementation of data management logic for the Tactical Gateway.
+ *
+ * This translation unit owns the persistent tactical dataset and provides:
+ *  - JSON-based data ingestion
+ *  - Controlled access to the master vehicle container
+ *  - Stateless comparison predicates for sorting derived views
  */
 
 // --- Lifecycle ---
 
 TacticalVehicleData::TacticalVehicleData() {
-    // Constructor initialized; data loading occurs via loadVehiclesFromJson
+    // Intentionally minimal.
+    // Data ingestion is explicitly triggered via loadVehiclesFromJson().
 }
 
 // --- Data Ingestion & Database Population ---
 
 /**
  * @brief Parses tactical data from a JSON file and initializes internal containers.
- * @param path The file system path to the source JSON file.
+ *
+ * This function fully resets the internal dataset before loading to ensure
+ * no stale or partially-loaded data remains.
+ *
+ * @param path The file system path or Qt resource path to the source JSON file.
  */
 void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
     QFile file(path);
@@ -29,7 +39,7 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         return;
     }
 
-    // Reset database to ensure no stale data remains
+    // Reset database to ensure a clean, deterministic state
     allVehicles.clear();
 
     QByteArray data = file.readAll();
@@ -38,7 +48,7 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
     QJsonParseError parseError;
     QJsonDocument doc = QJsonDocument::fromJson(data, &parseError);
 
-    // Validation of JSON syntax and structure
+    // Validation of JSON syntax and high-level structure
     if (parseError.error != QJsonParseError::NoError) {
         qWarning() << "Parse Error at offset" << parseError.offset << ":" << parseError.errorString();
         return;
@@ -55,7 +65,7 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         QJsonObject obj = value.toObject();
         TacticalVehicle v;
 
-        // Static Identity & Meta-data
+        // --- Static Identity & Classification ---
         v.callsign       = obj["callsign"].toString();
         v.trackId        = obj["trackId"].toString();
         v.type           = obj["type"].toString();
@@ -66,20 +76,22 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         v.propulsion     = obj["propulsion"].toString();
         v.natoIcon       = obj["natoIcon"].toString();
 
-        // Capabilities & Flags
+        // --- Operational Capabilities ---
         v.hasSatCom        = obj["hasSatCom"].toBool();
         v.isAmphibious     = obj["isAmphibious"].toBool();
         v.isUnmanned       = obj["isUnmanned"].toBool();
         v.hasActiveDefense = obj["hasActiveDefense"].toBool();
 
-        // Technical Specs & Telemetry
+        // --- Technical Specs & Telemetry Baseline ---
         v.protectionLevel  = obj["protectionLevel"].toInt();
         v.speed            = obj["speed"].toDouble();
         v.fuelLevel        = obj["fuelLevel"].toDouble();
         v.ammunitionLevel  = obj["ammunitionLevel"].toDouble();
         v.posX             = obj["posX"].toDouble();
         v.posY             = obj["posY"].toDouble();
-        v.distanceToTarget = 0.0; // Initialized for simulation calculation
+
+        // Distance is dynamically updated by the simulation engine
+        v.distanceToTarget = 0.0;
 
         allVehicles.push_back(v);
     }
@@ -87,9 +99,31 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
     qDebug() << "Tactical System: Successfully indexed" << allVehicles.size() << "assets.";
 }
 
+// --- Container Accessors ---
+
+/**
+ * @brief Read-only access to the master vehicle container.
+ *
+ * Intended for UI rendering and non-mutating inspection.
+ */
+const std::deque<TacticalVehicle>& TacticalVehicleData::vehicles() const {
+    return allVehicles;
+}
+
+/**
+ * @brief Mutable access to the vehicle container.
+ *
+ * Intended for controlled use cases such as:
+ *  - Simulation updates
+ *  - In-place sorting of the master dataset
+ */
+std::deque<TacticalVehicle>& TacticalVehicleData::vehiclesMutable() {
+    return allVehicles;
+}
+
 // --- Static Sorting Predicates ---
 // These predicates are used by std::sort to arrange both filtered
-// pointer views and the master vehicle container via adapters.
+// pointer-based views and the master vehicle container via adapters.
 
 // Distance Sorting
 bool TacticalVehicleData::sortByDistanceAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
@@ -126,3 +160,4 @@ bool TacticalVehicleData::sortByClassificationAsc(const TacticalVehicle* a, cons
 bool TacticalVehicleData::sortByClassificationDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->classification > b->classification;
 }
+

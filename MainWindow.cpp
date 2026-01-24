@@ -21,7 +21,6 @@
 #include <QGroupBox>
 #include <QTimer>
 #include <QDoubleValidator>
-#include <cmath>
 #include <vector>
 #include <algorithm>
 
@@ -205,7 +204,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
 
     // Section: Command Buttons
     leftPanel->addStretch();
-    displayButton = new QPushButton("DISPLAY RESULTS (" + QString::number(tacticalVehicleDb->allVehicles.size()) + ")");
+    displayButton = new QPushButton("DISPLAY RESULTS (" + QString::number(tacticalVehicleDb->vehicles().size()) + ")");
     displayButton->setMinimumHeight(50);
     displayButton->setStyleSheet(
         "QPushButton { background-color: #1a2a3a; color: white; border: 1px solid #334466; } "
@@ -323,7 +322,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     // --- 7. AUTO-COMPLETE & DYNAMIC UPDATES ---
 
     // Populate Search Data
-    for (const auto& v : tacticalVehicleDb->allVehicles) {
+    for (const auto& v : tacticalVehicleDb->vehicles()) {
         if (!v.callsign.isEmpty() && !callsignList.contains(v.callsign)) callsignList << v.callsign;
         if (!v.trackId.isEmpty() && !trackIdList.contains(v.trackId)) trackIdList << v.trackId;
     }
@@ -404,7 +403,7 @@ void MainWindow::filterFunction() {
     if (!anyFilterActive) {
         displayButton->setText(
             "DISPLAY RESULTS (" +
-            QString::number(tacticalVehicleDb->allVehicles.size()) + ")"
+            QString::number(tacticalVehicleDb->vehicles().size()) + ")"
             );
     } else {
         displayButton->setText(
@@ -714,7 +713,7 @@ void MainWindow::updateSortStatus() {
 void MainWindow::sortByFuelAsc() {
     if (resultsList->count() == 0) return;
     auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->allVehicles;
+    auto& av = tacticalVehicleDb->vehiclesMutable();
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelAsc);
@@ -730,7 +729,7 @@ void MainWindow::sortByFuelAsc() {
 void MainWindow::sortByFuelDesc() {
     if (resultsList->count() == 0) return;
     auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->allVehicles;
+    auto& av = tacticalVehicleDb->vehiclesMutable();
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelDesc);
@@ -746,7 +745,7 @@ void MainWindow::sortByFuelDesc() {
 void MainWindow::sortByPriorityAsc() {
     if (resultsList->count() == 0) return;
     auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->allVehicles;
+    auto& av = tacticalVehicleDb->vehiclesMutable();
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByPriorityAsc);
@@ -762,7 +761,7 @@ void MainWindow::sortByPriorityAsc() {
 void MainWindow::sortByPriorityDesc() {
     if (resultsList->count() == 0) return;
     auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->allVehicles;
+    auto& av = tacticalVehicleDb->vehiclesMutable();
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByPriorityDesc);
@@ -778,7 +777,7 @@ void MainWindow::sortByPriorityDesc() {
 void MainWindow::sortByClassificationAsc() {
     if (resultsList->count() == 0) return;
     auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->allVehicles;
+    auto& av = tacticalVehicleDb->vehiclesMutable();
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByClassificationAsc);
@@ -794,7 +793,7 @@ void MainWindow::sortByClassificationAsc() {
 void MainWindow::sortByClassificationDesc() {
     if (resultsList->count() == 0) return;
     auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->allVehicles;
+    auto& av = tacticalVehicleDb->vehiclesMutable();
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByClassificationDesc);
@@ -810,7 +809,7 @@ void MainWindow::sortByClassificationDesc() {
 void MainWindow::sortByDistanceAsc() {
     if (resultsList->count() == 0) return;
     auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->allVehicles;
+    auto& av = tacticalVehicleDb->vehiclesMutable();
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceAsc);
@@ -826,7 +825,7 @@ void MainWindow::sortByDistanceAsc() {
 void MainWindow::sortByDistanceDesc() {
     if (resultsList->count() == 0) return;
     auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->allVehicles;
+    auto& av = tacticalVehicleDb->vehiclesMutable();
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
         std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceDesc);
@@ -908,7 +907,7 @@ void MainWindow::printList() {
                         vehicle->affiliation);
         }
     } else {
-        for (const auto& vehicle : tacticalVehicleDb->allVehicles) {
+        for (const auto& vehicle : tacticalVehicleDb->vehicles()) {
             populateRow(vehicle.callsign,
                         vehicle.type,
                         vehicle.trackId,
