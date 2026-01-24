@@ -348,9 +348,28 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
  * Core engine for processing vehicle data based on UI criteria.
  */
 void MainWindow::filterFunction() {
-    controller->applyFilter();
-    controller->filteredVehicles.clear();
-    for (const auto& vehicle : tacticalVehicleDb->allVehicles) {
+    controller->applyFilter(
+        cbHasSatCom,
+        cbIsAmphibious,
+        cbIsUnmanned,
+        cbHasActiveDefense,
+        callsignSelectionPressed_Btn,
+        trackIdSelectionPressed_Btn,
+        domainButtonSelectionPressed_Btn,
+        propulsionSelectionPressed_Btn,
+        prioritySelectionPressed_Btn,
+        protectionSelectionMinPressed_Btn,
+        protectionSelectionMaxPressed_Btn,
+        nullptr,
+        fuelSlider->lowerValue(),
+        fuelSlider->upperValue(),
+        distanceSlider->lowerValue(),
+        distanceSlider->upperValue(),
+        affiliationButton->text()
+        );
+
+    /*filteredVehicles.clear();
+    for (const auto& vehicle : data.allVehicles) {
         bool capabilityMatch = true;
         bool callsignMatch = false;
         bool trackIdMatch = false;
@@ -474,22 +493,51 @@ void MainWindow::filterFunction() {
 
     // --- UI UPDATE ONLY (Original Logic) ---
     const bool anyFilterActive = (cbHasSatCom->isChecked() || cbIsAmphibious->isChecked() ||
-                            cbIsUnmanned->isChecked() || cbHasActiveDefense->isChecked() ||
-                            callsignSelectionPressed_Btn->isVisible() ||
-                            trackIdSelectionPressed_Btn->isVisible() ||
-                            domainButtonSelectionPressed_Btn->isVisible() ||
-                            propulsionSelectionPressed_Btn->isVisible() ||
-                            prioritySelectionPressed_Btn->isVisible() ||
-                            protectionSelectionMinPressed_Btn->isVisible() ||
-                            protectionSelectionMaxPressed_Btn->isVisible() ||
-                            fuelSlider->lowerValue() > 0 || fuelSlider->upperValue() < 100 ||
-                            distanceSlider->lowerValue() > 0 || distanceSlider->upperValue() < 10000 ||
-                            affiliationButton->text() != "All Types");
+                                  cbIsUnmanned->isChecked() || cbHasActiveDefense->isChecked() ||
+                                  callsignSelectionPressed_Btn->isVisible() ||
+                                  trackIdSelectionPressed_Btn->isVisible() ||
+                                  domainButtonSelectionPressed_Btn->isVisible() ||
+                                  propulsionSelectionPressed_Btn->isVisible() ||
+                                  prioritySelectionPressed_Btn->isVisible() ||
+                                  protectionSelectionMinPressed_Btn->isVisible() ||
+                                  protectionSelectionMaxPressed_Btn->isVisible() ||
+                                  fuelSlider->lowerValue() > 0 || fuelSlider->upperValue() < 100 ||
+                                  distanceSlider->lowerValue() > 0 || distanceSlider->upperValue() < 10000 ||
+                                  affiliationButton->text() != "All Types");
 
     if (!anyFilterActive) {
-        displayButton->setText("DISPLAY RESULTS (" + QString::number(tacticalVehicleDb->allVehicles.size()) + ")");
+        displayButton->setText("DISPLAY RESULTS (" + QString::number(data.allVehicles.size()) + ")");
     } else {
         displayButton->setText("DISPLAY RESULTS (" + QString::number(controller->filteredVehicles.size()) + ")");
+    }*/
+    const bool anyFilterActive =
+        (cbHasSatCom->isChecked() ||
+         cbIsAmphibious->isChecked() ||
+         cbIsUnmanned->isChecked() ||
+         cbHasActiveDefense->isChecked() ||
+         callsignSelectionPressed_Btn->isVisible() ||
+         trackIdSelectionPressed_Btn->isVisible() ||
+         domainButtonSelectionPressed_Btn->isVisible() ||
+         propulsionSelectionPressed_Btn->isVisible() ||
+         prioritySelectionPressed_Btn->isVisible() ||
+         protectionSelectionMinPressed_Btn->isVisible() ||
+         protectionSelectionMaxPressed_Btn->isVisible() ||
+         fuelSlider->lowerValue() > 0 ||
+         fuelSlider->upperValue() < 100 ||
+         distanceSlider->lowerValue() > 0 ||
+         distanceSlider->upperValue() < 10000 ||
+         affiliationButton->text() != "All Types");
+
+    if (!anyFilterActive) {
+        displayButton->setText(
+            "DISPLAY RESULTS (" +
+            QString::number(tacticalVehicleDb->allVehicles.size()) + ")"
+            );
+    } else {
+        displayButton->setText(
+            "DISPLAY RESULTS (" +
+            QString::number(controller->filteredVehicles.size()) + ")"
+            );
     }
 }
 
