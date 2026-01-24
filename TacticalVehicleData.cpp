@@ -86,12 +86,6 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         allVehicles.push_back(v);
     }
 
-    // Synchronize filteredVehicles with the newly loaded master list
-    // This provides a default "No Filter" view immediately after loading
-    for (const auto& vehicle : allVehicles) {
-        filteredVehicles.push_back(&vehicle);
-    }
-
     qDebug() << "Tactical System: Successfully indexed" << allVehicles.size() << "assets.";
 }
 

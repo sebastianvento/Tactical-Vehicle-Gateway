@@ -21,9 +21,6 @@ public:
     /** @brief Master container owning all vehicle objects. */
     std::deque<TacticalVehicle> allVehicles;
 
-    /** @brief View container holding pointers to vehicles that meet current filter criteria. */
-    std::vector<const TacticalVehicle*> filteredVehicles;
-
     // --- Persistence & I/O ---
     /** * @brief Parses vehicle data from a JSON resource.
      * @param path The file path or Qt resource path (e.g., ":/data/vehicles.json").

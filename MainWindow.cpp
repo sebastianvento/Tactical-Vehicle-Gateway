@@ -33,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
 
     // --- 1. DATA & CORE INITIALIZATION ---
     tacticalVehicleDb = std::make_unique<TacticalVehicleData>();
+    controller = std::make_unique<TacticalVehicleController>(*tacticalVehicleDb);
     tacticalVehicleDb->loadVehiclesFromJson(":/data/vehicles.json");
     choiceDeletion = QIcon::fromTheme(QIcon::ThemeIcon::WindowClose);
 
@@ -347,7 +348,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
  * Core engine for processing vehicle data based on UI criteria.
  */
 void MainWindow::filterFunction() {
-    tacticalVehicleDb->filteredVehicles.clear();
+    controller->filteredVehicles.clear();
     for (const auto& vehicle : tacticalVehicleDb->allVehicles) {
         bool capabilityMatch = true;
         bool callsignMatch = false;
@@ -466,7 +467,7 @@ void MainWindow::filterFunction() {
             protectionMatchMax && fuelMatchMin && fuelMatchMax &&
             distanceMatchMin && distanceMatchMax && affiliationMatch) {
 
-            tacticalVehicleDb->filteredVehicles.push_back(&vehicle);
+            controller->filteredVehicles.push_back(&vehicle);
         }
     }
 
@@ -487,7 +488,7 @@ void MainWindow::filterFunction() {
     if (!anyFilterActive) {
         displayButton->setText("DISPLAY RESULTS (" + QString::number(tacticalVehicleDb->allVehicles.size()) + ")");
     } else {
-        displayButton->setText("DISPLAY RESULTS (" + QString::number(tacticalVehicleDb->filteredVehicles.size()) + ")");
+        displayButton->setText("DISPLAY RESULTS (" + QString::number(controller->filteredVehicles.size()) + ")");
     }
 }
 
@@ -807,7 +808,7 @@ void MainWindow::updateSortStatus() {
 
 void MainWindow::sortByFuelAsc() {
     if (resultsList->count() == 0) return;
-    auto& fv = tacticalVehicleDb->filteredVehicles;
+    auto& fv = controller->filteredVehicles;
     auto& av = tacticalVehicleDb->allVehicles;
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
@@ -823,7 +824,7 @@ void MainWindow::sortByFuelAsc() {
 
 void MainWindow::sortByFuelDesc() {
     if (resultsList->count() == 0) return;
-    auto& fv = tacticalVehicleDb->filteredVehicles;
+    auto& fv = controller->filteredVehicles;
     auto& av = tacticalVehicleDb->allVehicles;
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
@@ -839,7 +840,7 @@ void MainWindow::sortByFuelDesc() {
 
 void MainWindow::sortByPriorityAsc() {
     if (resultsList->count() == 0) return;
-    auto& fv = tacticalVehicleDb->filteredVehicles;
+    auto& fv = controller->filteredVehicles;
     auto& av = tacticalVehicleDb->allVehicles;
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
@@ -855,7 +856,7 @@ void MainWindow::sortByPriorityAsc() {
 
 void MainWindow::sortByPriorityDesc() {
     if (resultsList->count() == 0) return;
-    auto& fv = tacticalVehicleDb->filteredVehicles;
+    auto& fv = controller->filteredVehicles;
     auto& av = tacticalVehicleDb->allVehicles;
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
@@ -871,7 +872,7 @@ void MainWindow::sortByPriorityDesc() {
 
 void MainWindow::sortByClassificationAsc() {
     if (resultsList->count() == 0) return;
-    auto& fv = tacticalVehicleDb->filteredVehicles;
+    auto& fv = controller->filteredVehicles;
     auto& av = tacticalVehicleDb->allVehicles;
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
@@ -887,7 +888,7 @@ void MainWindow::sortByClassificationAsc() {
 
 void MainWindow::sortByClassificationDesc() {
     if (resultsList->count() == 0) return;
-    auto& fv = tacticalVehicleDb->filteredVehicles;
+    auto& fv = controller->filteredVehicles;
     auto& av = tacticalVehicleDb->allVehicles;
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
@@ -903,7 +904,7 @@ void MainWindow::sortByClassificationDesc() {
 
 void MainWindow::sortByDistanceAsc() {
     if (resultsList->count() == 0) return;
-    auto& fv = tacticalVehicleDb->filteredVehicles;
+    auto& fv = controller->filteredVehicles;
     auto& av = tacticalVehicleDb->allVehicles;
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
@@ -919,7 +920,7 @@ void MainWindow::sortByDistanceAsc() {
 
 void MainWindow::sortByDistanceDesc() {
     if (resultsList->count() == 0) return;
-    auto& fv = tacticalVehicleDb->filteredVehicles;
+    auto& fv = controller->filteredVehicles;
     auto& av = tacticalVehicleDb->allVehicles;
 
     if (displayButton->text().contains("(" + QString::number(fv.size()) + ")") && fv.size() != av.size()) {
@@ -993,7 +994,7 @@ void MainWindow::printList() {
                             affiliationButton->text() != "All Types");
 
     if (anyFilterActive) {
-        for (const auto* vehicle : tacticalVehicleDb->filteredVehicles) {
+        for (const auto* vehicle : controller->filteredVehicles) {
             populateRow(vehicle->callsign,
                         vehicle->type,
                         vehicle->trackId,

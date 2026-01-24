@@ -1,7 +1,11 @@
 #ifndef TACTICALVEHICLECONTROLLER_H
 #define TACTICALVEHICLECONTROLLER_H
 
+#include <vector>
+
+
 class TacticalVehicleData;
+struct TacticalVehicle;
 
 /**
  * @class TacticalVehicleController
@@ -11,6 +15,7 @@ class TacticalVehicleController
 {
 public:
     explicit TacticalVehicleController(TacticalVehicleData& data);
+    std::vector<const TacticalVehicle*> filteredVehicles;
 
 private:
     TacticalVehicleData& data;

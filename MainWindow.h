@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include "TacticalVehicle.h"
+#include "TacticalVehicleController.h"
 #include <QWidget>
 #include <vector>
 
@@ -81,6 +82,7 @@ private slots:
 private:
     // --- Backend Data Controllers ---
     std::unique_ptr<TacticalVehicleData> tacticalVehicleDb;
+    std::unique_ptr<TacticalVehicleController> controller;
     QStringList trackIdList;
     QStringList callsignList;
     bool manualUpdateRequested = false;
