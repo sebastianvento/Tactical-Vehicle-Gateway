@@ -14,7 +14,7 @@ TacticalVehicleController::TacticalVehicleController(TacticalVehicleData& data) 
 // --- FILTERING LOGIC ---
 // Core engine for evaluating tactical vehicle data against
 // UI-provided filter criteria.
-//
+
 // This function is intentionally UI-agnostic: all visual state
 // (visibility, selections, ranges) is resolved by MainWindow
 // before being passed here as primitive values.
@@ -145,7 +145,7 @@ bool TacticalVehicleController::isFilterActive() const {
 // --- SIMULATION LOGIC ---
 // Advances vehicle positions and recalculates distances
 // relative to the current mission target.
-//
+
 // This function operates exclusively on model data and is
 // triggered externally by a timed heartbeat (QTimer).
 void TacticalVehicleController::updateSimulation(double targetX, double targetY)
