@@ -386,25 +386,7 @@ void MainWindow::filterFunction() {
 
     controller->applyFilter(criteria);
 
-    const bool anyFilterActive =
-        (cbHasSatCom->isChecked() ||
-         cbIsAmphibious->isChecked() ||
-         cbIsUnmanned->isChecked() ||
-         cbHasActiveDefense->isChecked() ||
-         callsignSelectionPressed_Btn->isVisible() ||
-         trackIdSelectionPressed_Btn->isVisible() ||
-         domainButtonSelectionPressed_Btn->isVisible() ||
-         propulsionSelectionPressed_Btn->isVisible() ||
-         prioritySelectionPressed_Btn->isVisible() ||
-         protectionSelectionMinPressed_Btn->isVisible() ||
-         protectionSelectionMaxPressed_Btn->isVisible() ||
-         fuelSlider->lowerValue() > 0 ||
-         fuelSlider->upperValue() < 100 ||
-         distanceSlider->lowerValue() > 0 ||
-         distanceSlider->upperValue() < 10000 ||
-         affiliationButton->text() != "All Types");
-
-    if (!anyFilterActive) {
+    if (!controller->isFilterActive()) {
         displayButton->setText(
             "DISPLAY RESULTS (" +
             QString::number(tacticalVehicleDb->vehicles().size()) + ")"
@@ -887,20 +869,7 @@ void MainWindow::printList() {
         }
     };
 
-    bool anyFilterActive = (cbHasSatCom->isChecked() || cbIsAmphibious->isChecked() ||
-                            cbIsUnmanned->isChecked() || cbHasActiveDefense->isChecked() ||
-                            callsignSelectionPressed_Btn->isVisible() ||
-                            trackIdSelectionPressed_Btn->isVisible() ||
-                            domainButtonSelectionPressed_Btn->isVisible() ||
-                            propulsionSelectionPressed_Btn->isVisible() ||
-                            prioritySelectionPressed_Btn->isVisible() ||
-                            protectionSelectionMinPressed_Btn->isVisible() ||
-                            protectionSelectionMaxPressed_Btn->isVisible() ||
-                            fuelSlider->lowerValue() > 0 || fuelSlider->upperValue() < 100 ||
-                            distanceSlider->lowerValue() > 0 || distanceSlider->upperValue() < 10000 ||
-                            affiliationButton->text() != "All Types");
-
-    if (anyFilterActive) {
+    if (controller->isFilterActive()) {
         for (const auto* vehicle : controller->filteredVehicles) {
             populateRow(vehicle->callsign,
                         vehicle->type,

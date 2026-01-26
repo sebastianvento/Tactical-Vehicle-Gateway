@@ -32,6 +32,7 @@ public:
      * Does NOT perform any UI updates or own presentation state.
      */
     void applyFilter(const FilterCriteria& criteria);
+    bool isFilterActive() const;
 
     /**
      * @section SIMULATION_LOGIC

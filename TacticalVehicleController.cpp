@@ -125,6 +125,10 @@ void TacticalVehicleController::applyFilter(const FilterCriteria& criteria) {
     }
 }
 
+bool TacticalVehicleController::isFilterActive() const {
+    return filteredVehicles.size() != data.vehicles().size();
+}
+
 /**
  * @section SIMULATION_LOGIC
  * Advances vehicle positions and recalculates distances
