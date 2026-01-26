@@ -9,11 +9,6 @@
 class TacticalVehicleData;
 struct TacticalVehicle;
 
-enum class VehicleViewMode {
-    AllVehicles,
-    FilteredVehicles
-};
-
 /**
  * @class TacticalVehicleController
  * @brief Central logic controller for tactical vehicle processing.
@@ -38,7 +33,6 @@ public:
      */
     void applyFilter(const FilterCriteria& criteria);
     bool isFilterActive() const;
-    VehicleViewMode viewMode() const;
 
     /**
      * @section SIMULATION_LOGIC
@@ -55,8 +49,6 @@ public:
 private:
     /** Reference to the authoritative vehicle data store. */
     TacticalVehicleData& data;
-
-    VehicleViewMode currentView = VehicleViewMode::AllVehicles;
 };
 
 #endif // TACTICALVEHICLECONTROLLER_H

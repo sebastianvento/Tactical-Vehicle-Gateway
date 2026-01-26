@@ -123,15 +123,6 @@ void TacticalVehicleController::applyFilter(const FilterCriteria& criteria) {
             filteredVehicles.push_back(&vehicle);
         }
     }
-    if (isFilterActive()) {
-        currentView = VehicleViewMode::FilteredVehicles;
-    } else {
-        currentView = VehicleViewMode::AllVehicles;
-    }
-}
-
-VehicleViewMode TacticalVehicleController::viewMode() const {
-    return currentView;
 }
 
 /**
