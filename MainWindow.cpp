@@ -1,6 +1,7 @@
 #include "MainWindow.h"
 #include "TacticalVehicleData.h"
-#include "rangeslider.h"
+#include "RangeSlider.h"
+#include "FilterCriteria.h"
 #include <QApplication>
 #include <QObject>
 #include <QPushButton>
@@ -347,41 +348,44 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
  * Core engine for processing vehicle data based on UI criteria.
  */
 void MainWindow::filterFunction() {
-    controller->applyFilter(
-        cbHasSatCom->isChecked(),
-        cbIsAmphibious->isChecked(),
-        cbIsUnmanned->isChecked(),
-        cbHasActiveDefense->isChecked(),
+    FilterCriteria criteria;
 
-        callsignSelectionPressed_Btn->isVisible(),
-        callsignSelectionPressed_Btn->text(),
+    criteria.hasSatCom = cbHasSatCom->isChecked();
+    criteria.isAmphibious = cbIsAmphibious->isChecked();
+    criteria.isUnmanned = cbIsUnmanned->isChecked();
+    criteria.hasActiveDefense = cbHasActiveDefense->isChecked();
 
-        trackIdSelectionPressed_Btn->isVisible(),
-        trackIdSelectionPressed_Btn->text(),
+    criteria.callsignActive = callsignSelectionPressed_Btn->isVisible();
+    criteria.callsign = callsignSelectionPressed_Btn->text();
 
-        domainButtonSelectionPressed_Btn->isVisible(),
-        domainButtonSelectionPressed_Btn->text(),
+    criteria.trackIdActive = trackIdSelectionPressed_Btn->isVisible();
+    criteria.trackId = trackIdSelectionPressed_Btn->text();
 
-        propulsionSelectionPressed_Btn->isVisible(),
-        propulsionSelectionPressed_Btn->text(),
+    criteria.domainActive = domainButtonSelectionPressed_Btn->isVisible();
+    criteria.domain = domainButtonSelectionPressed_Btn->text();
 
-        prioritySelectionPressed_Btn->isVisible(),
-        prioritySelectionPressed_Btn->text(),
+    criteria.propulsionActive = propulsionSelectionPressed_Btn->isVisible();
+    criteria.propulsion = propulsionSelectionPressed_Btn->text();
 
-        protectionSelectionMinPressed_Btn->isVisible(),
-        protectionSelectionMinPressed_Btn->text().toInt(),
+    criteria.priorityActive = prioritySelectionPressed_Btn->isVisible();
+    criteria.priority = prioritySelectionPressed_Btn->text();
 
-        protectionSelectionMaxPressed_Btn->isVisible(),
-        protectionSelectionMaxPressed_Btn->text().toInt(),
+    criteria.protectionMinActive = protectionSelectionMinPressed_Btn->isVisible();
+    criteria.protectionMin = protectionSelectionMinPressed_Btn->text().toInt();
 
-        fuelSlider->lowerValue(),
-        fuelSlider->upperValue(),
+    criteria.protectionMaxActive = protectionSelectionMaxPressed_Btn->isVisible();
+    criteria.protectionMax = protectionSelectionMaxPressed_Btn->text().toInt();
 
-        distanceSlider->lowerValue(),
-        distanceSlider->upperValue(),
+    criteria.fuelMin = fuelSlider->lowerValue();
+    criteria.fuelMax = fuelSlider->upperValue();
 
-        affiliationButton->text()
-    );
+    criteria.distanceMin = distanceSlider->lowerValue();
+    criteria.distanceMax = distanceSlider->upperValue();
+
+    criteria.affiliation = affiliationButton->text();
+
+    controller->applyFilter(criteria);
+
     const bool anyFilterActive =
         (cbHasSatCom->isChecked() ||
          cbIsAmphibious->isChecked() ||

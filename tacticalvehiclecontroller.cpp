@@ -19,42 +19,7 @@ TacticalVehicleController::TacticalVehicleController(TacticalVehicleData& data) 
  * (visibility, selections, ranges) is resolved by MainWindow
  * before being passed here as primitive values.
  */
-void TacticalVehicleController::applyFilter(
-    bool hasSatCom,
-    bool isAmphibious,
-    bool isUnmanned,
-    bool hasActiveDefense,
-
-    bool callsignActive,
-    const QString& callsign,
-
-    bool trackIdActive,
-    const QString& trackId,
-
-    bool domainActive,
-    const QString& domain,
-
-    bool propulsionActive,
-    const QString& propulsion,
-
-    bool priorityActive,
-    const QString& priority,
-
-    bool protectionMinActive,
-    int protectionMin,
-
-    bool protectionMaxActive,
-    int protectionMax,
-
-    int fuelMin,
-    int fuelMax,
-
-    int distanceMin,
-    int distanceMax,
-
-    const QString& affiliation
-    )
-{
+void TacticalVehicleController::applyFilter(const FilterCriteria& criteria) {
     filteredVehicles.clear();
 
     for (const auto& vehicle : data.vehicles()) {
@@ -75,68 +40,68 @@ void TacticalVehicleController::applyFilter(
         bool affiliationMatch    = true;
 
         // --- 1. Operational Capabilities (Strict AND Logic) ---
-        if (hasSatCom && !vehicle.hasSatCom) {
+        if (criteria.hasSatCom && !vehicle.hasSatCom) {
             capabilityMatch = false;
         }
-        if (isAmphibious && !vehicle.isAmphibious) {
+        if (criteria.isAmphibious && !vehicle.isAmphibious) {
             capabilityMatch = false;
         }
-        if (isUnmanned && !vehicle.isUnmanned) {
+        if (criteria.isUnmanned && !vehicle.isUnmanned) {
             capabilityMatch = false;
         }
-        if (hasActiveDefense && !vehicle.hasActiveDefense) {
+        if (criteria.hasActiveDefense && !vehicle.hasActiveDefense) {
             capabilityMatch = false;
         }
 
         // --- 2. Identity Filters ---
-        if (callsignActive && vehicle.callsign != callsign) {
+        if (criteria.callsignActive && vehicle.callsign != criteria.callsign) {
             callsignMatch = false;
         }
 
-        if (trackIdActive && vehicle.trackId != trackId) {
+        if (criteria.trackIdActive && vehicle.trackId != criteria.trackId) {
             trackIdMatch = false;
         }
 
         // --- 3. Strategic Classification ---
-        if (domainActive && vehicle.domain != domain) {
+        if (criteria.domainActive && vehicle.domain != criteria.domain) {
             domainMatch = false;
         }
 
-        if (propulsionActive && vehicle.propulsion != propulsion) {
+        if (criteria.propulsionActive && vehicle.propulsion != criteria.propulsion) {
             propulsionMatch = false;
         }
 
-        if (priorityActive && vehicle.priority != priority) {
+        if (criteria.priorityActive && vehicle.priority != criteria.priority) {
             priorityMatch = false;
         }
 
         // --- 4. Protection Constraints ---
-        if (protectionMinActive && vehicle.protectionLevel < protectionMin) {
+        if (criteria.protectionMinActive && vehicle.protectionLevel < criteria.protectionMin) {
             protectionMatchMin = false;
         }
 
-        if (protectionMaxActive && vehicle.protectionLevel > protectionMax) {
+        if (criteria.protectionMaxActive && vehicle.protectionLevel > criteria.protectionMax) {
             protectionMatchMax = false;
         }
 
         // --- 5. Telemetry Ranges ---
-        if (vehicle.fuelLevel < fuelMin) {
+        if (vehicle.fuelLevel < criteria.fuelMin) {
             fuelMatchMin = false;
         }
-        if (vehicle.fuelLevel > fuelMax) {
+        if (vehicle.fuelLevel > criteria.fuelMax) {
             fuelMatchMax = false;
         }
 
-        if (vehicle.distanceToTarget < distanceMin) {
+        if (vehicle.distanceToTarget < criteria.distanceMin) {
             distanceMatchMin = false;
         }
-        if (distanceMax < 10000 && vehicle.distanceToTarget > distanceMax) {
+        if (criteria.distanceMax < 10000 && vehicle.distanceToTarget > criteria.distanceMax) {
             distanceMatchMax = false;
         }
 
         // --- 6. Affiliation ---
-        if (affiliation != "All Types" &&
-            vehicle.affiliation != affiliation) {
+        if (criteria.affiliation != "All Types" &&
+            vehicle.affiliation != criteria.affiliation) {
             affiliationMatch = false;
         }
 

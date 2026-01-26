@@ -1,8 +1,10 @@
 #ifndef TACTICALVEHICLECONTROLLER_H
 #define TACTICALVEHICLECONTROLLER_H
 
+#include "FilterCriteria.h"
 #include <vector>
 #include <QString>
+
 
 class TacticalVehicleData;
 struct TacticalVehicle;
@@ -29,41 +31,7 @@ public:
      * Computes filteredVehicles based on externally provided criteria.
      * Does NOT perform any UI updates or own presentation state.
      */
-    void applyFilter(
-        bool hasSatCom,
-        bool isAmphibious,
-        bool isUnmanned,
-        bool hasActiveDefense,
-
-        bool callsignActive,
-        const QString& callsign,
-
-        bool trackIdActive,
-        const QString& trackId,
-
-        bool domainActive,
-        const QString& domain,
-
-        bool propulsionActive,
-        const QString& propulsion,
-
-        bool priorityActive,
-        const QString& priority,
-
-        bool protectionMinActive,
-        int protectionMin,
-
-        bool protectionMaxActive,
-        int protectionMax,
-
-        int fuelMin,
-        int fuelMax,
-
-        int distanceMin,
-        int distanceMax,
-
-        const QString& affiliation
-        );
+    void applyFilter(const FilterCriteria& criteria);
 
     /**
      * @section SIMULATION_LOGIC
