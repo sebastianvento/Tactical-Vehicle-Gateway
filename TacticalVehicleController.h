@@ -14,8 +14,7 @@ struct TacticalVehicle;
  * Pure data container used to parameterize filtering logic.
  * Contains no behavior or validation.
  */
-struct FilterCriteria
-{
+struct FilterCriteria {
     // --- Capability Flags ---
     bool hasSatCom = false;
     bool isAmphibious = false;
@@ -66,8 +65,7 @@ struct FilterCriteria
  *
  * This class is UI-agnostic and operates purely on model data.
  */
-class TacticalVehicleController
-{
+class TacticalVehicleController {
 public:
     explicit TacticalVehicleController(TacticalVehicleData& data);
 

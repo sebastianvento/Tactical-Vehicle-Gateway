@@ -148,8 +148,7 @@ bool TacticalVehicleController::isFilterActive() const {
 
 // This function operates exclusively on model data and is
 // triggered externally by a timed heartbeat (QTimer).
-void TacticalVehicleController::updateSimulation(double targetX, double targetY)
-{
+void TacticalVehicleController::updateSimulation(double targetX, double targetY) {
     constexpr double PI_CONST = 3.14159265358979323846;
 
     for (auto& v : data.vehiclesMutable()) {

@@ -10,8 +10,7 @@
  * Provides an interactive control for selecting a minimum and maximum
  * value within a bounded numeric range.
  */
-class RangeSlider : public QWidget
-{
+class RangeSlider : public QWidget {
     Q_OBJECT
 
 public:

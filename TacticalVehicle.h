@@ -10,8 +10,7 @@
  * Holds static identity and classification data, technical characteristics,
  * and dynamic telemetry used for simulation, filtering, and presentation.
  */
-struct TacticalVehicle
-{
+struct TacticalVehicle {
     // --- Identity & Classification ---
     QString callsign;        ///< Unique radio callsign (e.g. "Sabre 1-1")
     QString trackId;         ///< Unique system track identifier (e.g. "T-7201")

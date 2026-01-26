@@ -12,8 +12,7 @@
  * Owns the authoritative vehicle container, handles JSON-based ingestion,
  * and provides stateless comparison predicates for sorting derived views.
  */
-class TacticalVehicleData
-{
+class TacticalVehicleData {
 public:
     // --- Lifecycle ---
     TacticalVehicleData();
@@ -31,6 +30,7 @@ public:
 
     // --- Sorting Predicates ---
     // Stateless comparators intended for std::sort on pointer-based views.
+
     // Distance-based
     static bool sortByDistanceAsc(const TacticalVehicle* a, const TacticalVehicle* b);
     static bool sortByDistanceDesc(const TacticalVehicle* a, const TacticalVehicle* b);

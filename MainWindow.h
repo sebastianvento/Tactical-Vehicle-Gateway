@@ -26,8 +26,7 @@ class TacticalVehicleData;
  * Owns all UI state and presentation logic, delegates domain logic
  * (filtering, simulation) to TacticalVehicleController.
  */
-class MainWindow : public QWidget
-{
+class MainWindow : public QWidget {
     Q_OBJECT
 
 public:
