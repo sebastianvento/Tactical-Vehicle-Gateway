@@ -123,8 +123,31 @@ void TacticalVehicleController::applyFilter(const FilterCriteria& criteria) {
             filteredVehicles.push_back(&vehicle);
         }
     }
+    if (isFilterActive()) {
+        currentView = VehicleViewMode::FilteredVehicles;
+    } else {
+        currentView = VehicleViewMode::AllVehicles;
+    }
 }
 
+VehicleViewMode TacticalVehicleController::viewMode() const {
+    return currentView;
+}
+
+/**
+ * @brief Indicates whether filtering currently affects the displayed result set.
+ *
+ * This function defines "filter active" in an outcome-based sense:
+ * it returns true when the filtered view differs from the full vehicle dataset.
+ *
+ * Note:
+ * - This does NOT represent user filter intent.
+ * - If filter criteria are applied but happen to match all vehicles,
+ *   this function will return false.
+ *
+ * This definition is intentional and matches the current UI behavior,
+ * where view selection depends on whether filtering narrows results.
+ */
 bool TacticalVehicleController::isFilterActive() const {
     return filteredVehicles.size() != data.vehicles().size();
 }

@@ -386,7 +386,7 @@ void MainWindow::filterFunction() {
 
     controller->applyFilter(criteria);
 
-    if (!controller->isFilterActive()) {
+    if (controller->viewMode() == VehicleViewMode::AllVehicles) {
         displayButton->setText(
             "DISPLAY RESULTS (" +
             QString::number(tacticalVehicleDb->vehicles().size()) + ")"
@@ -869,7 +869,7 @@ void MainWindow::printList() {
         }
     };
 
-    if (controller->isFilterActive()) {
+    if (controller->viewMode() == VehicleViewMode::FilteredVehicles) {
         for (const auto* vehicle : controller->filteredVehicles) {
             populateRow(vehicle->callsign,
                         vehicle->type,
