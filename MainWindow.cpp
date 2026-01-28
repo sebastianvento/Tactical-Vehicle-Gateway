@@ -926,8 +926,8 @@ void MainWindow::printList() {
         QString cSign = callsign.leftJustified(18, ' ');
         QString vType = type.leftJustified(20, ' ');
         QString tId   = ("ID: " + trackId).leftJustified(18, ' ');
-        QString dDist = ("Distance to target: " + QString::number(dist, 'f', 0) + "m").leftJustified(32, ' ');
-        QString fFuel = ("Est. fuel level: " + QString::number(fuel, 'f', 1) + "%").leftJustified(24, ' ');
+        QString dDist = ("Distance to target: " + QString::number(dist, 'f', 0) + " m").leftJustified(32, ' ');
+        QString fFuel = ("Est. fuel level: " + QString::number(fuel, 'f', 1) + " %").leftJustified(24, ' ');
         QString pProt = ("Protection level: " + QString::number(prot)).leftJustified(22, ' ');
 
         QString row = QString("%1 | %2 | %3 | %4 | %5 | %6")
@@ -1011,11 +1011,11 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
             QString dDom =   ("Domain:             " + vehicle.domain);
             QString dClas =  ("Classification:     " + vehicle.classification);
             QString dTyp =   ("Type:               " + vehicle.type);
-            QString dDist =  ("Distance to target: " + QString::number(vehicle.distanceToTarget, 'f', 0) + "m");
-            QString dSpe =   ("Speed:              " + QString::number(vehicle.speed, 'f', 0) + "km/h");
+            QString dDist =  ("Distance to target: " + QString::number(vehicle.distanceToTarget, 'f', 0) + " m");
+            QString dSpe =   ("Speed:              " + QString::number(vehicle.speed, 'f', 0) + " km/h");
             QString dHea =   ("Heading:            " + QString::number(vehicle.heading, 'f', 0) + "°");
-            QString dFue =   ("Est. fuel level:    " + QString::number(vehicle.fuelLevel, 'f', 1) + "%");
-            QString dAmm =   ("Est. amm. level:    " + QString::number(vehicle.ammunitionLevel, 'f', 1) + "%");
+            QString dFue =   ("Est. fuel level:    " + QString::number(vehicle.fuelLevel, 'f', 1) + " %");
+            QString dAmm =   ("Est. amm. level:    " + QString::number(vehicle.ammunitionLevel, 'f', 1) + " %");
             QString dUnm;
             if (vehicle.isUnmanned) {
                 dUnm = "Yes";
@@ -1050,7 +1050,7 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
 
             dAmp =           ("Is Amphibious:      " + dAmp);
             QString dProt =  ("Protection Level:   " + QString::number(vehicle.protectionLevel, 'f', 0));
-            QString dMSpe =  ("Maximum Speed:      " + QString::number(vehicle.maxSpeed, 'f', 0) + "km/h");
+            QString dMSpe =  ("Maximum Speed:      " + QString::number(vehicle.maxSpeed, 'f', 0) + " km/h");
             QString dProp =  ("Propulsion:         " + vehicle.propulsion);
 
             new QListWidgetItem(dCall, entityList);
@@ -1088,8 +1088,8 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
     connect(simTimer, &QTimer::timeout, entityDialog, [=]() {
         for (const auto &vehicleUpdate : tacticalVehicleDb->vehicles()) {
             if (vehicleUpdate.callsign == extractedCallsign && entityLiveUpdatesBox->isChecked()) {
-                distanceItem->setText("Distance to target: " +QString::number(vehicleUpdate.distanceToTarget, 'f', 0) + "m");
-                speedItem->setText   ("Speed:              " + QString::number(vehicleUpdate.speed, 'f', 0) + "km/h");
+                distanceItem->setText("Distance to target: " +QString::number(vehicleUpdate.distanceToTarget, 'f', 0) + " m");
+                speedItem->setText   ("Speed:              " + QString::number(vehicleUpdate.speed, 'f', 0) + " km/h");
                 headingItem->setText ("Heading:            " + QString::number(vehicleUpdate.heading, 'f', 0) + "°");
             }
         }
