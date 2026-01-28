@@ -971,13 +971,14 @@ void MainWindow::printList() {
 // Slot responsible for entity dialog.
 void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
     entityDialog = new QDialog(this);
+    entityDialog->setAttribute(Qt::WA_DeleteOnClose);
     entityDialog->show();
     entityDialog->raise();
     entityDialog->activateWindow();
     entityDialog->setSizeGripEnabled(true);
     entityDialog->setBaseSize(375, 375);
 
-    QString extractedCallsign = item->text().section(' ', 0, 0);
+    QString extractedCallsign = item->text().split('|').first().trimmed();
 
     QHBoxLayout *entityTopPanel = new QHBoxLayout();
     QLabel *entityLiveUpdatesLabel = new QLabel("Live Updates");

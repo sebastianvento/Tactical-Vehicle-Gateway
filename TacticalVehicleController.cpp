@@ -172,10 +172,10 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
                 lower = v.targetSpeed-v.targetSpeed*0.01;
                 upper = v.targetSpeed+v.targetSpeed*0.01;
             }
-        quint32 lowerLimit = static_cast<qint32>(lower);
-        quint32 upperLimit = static_cast<qint32>(upper);
-        variedSpeed = QRandomGenerator::global()->bounded(lowerLimit, upperLimit);
-        v.speed = static_cast<double>(variedSpeed);
+            quint32 lowerLimit = static_cast<qint32>(lower);
+            quint32 upperLimit = std::max(lowerLimit + 1, static_cast<quint32>(upper));
+            variedSpeed = QRandomGenerator::global()->bounded(lowerLimit, upperLimit);
+            v.speed = static_cast<double>(variedSpeed);
 
         // Variating heading realistically
         quint32 variedHeading = 0;
