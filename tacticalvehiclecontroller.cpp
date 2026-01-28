@@ -2,6 +2,7 @@
 #include "TacticalVehicleData.h"
 
 #include <cmath>
+#include <QRandomGenerator>
 
 /**
  * @brief Binds the controller to the shared TacticalVehicleData store.
@@ -155,6 +156,41 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
 
         // Convert heading to radians (UI uses degrees)
         const double rad = (v.heading - 90.0) * (PI_CONST / 180.0);
+
+        // Variating speed realistically
+        quint32 variedSpeed = 0;
+        double upper = 0.0;
+        double lower = 0.0;
+        if (v.speed > 0) {
+            if(v.speed < 100) {
+                lower = v.targetSpeed-v.targetSpeed*0.03;
+                upper = v.targetSpeed+v.targetSpeed*0.03;
+            } else if (v.speed > 100 && v.speed < 300) {
+                lower = v.targetSpeed-v.targetSpeed*0.02;
+                upper = v.targetSpeed+v.targetSpeed*0.02;
+            } else {
+                lower = v.targetSpeed-v.targetSpeed*0.01;
+                upper = v.targetSpeed+v.targetSpeed*0.01;
+            }
+        quint32 lowerLimit = static_cast<qint32>(lower);
+        quint32 upperLimit = static_cast<qint32>(upper);
+        variedSpeed = QRandomGenerator::global()->bounded(lowerLimit, upperLimit);
+        v.speed = static_cast<double>(variedSpeed);
+
+        // Variating heading realistically
+        quint32 variedHeading = 0;
+        if (v.heading > 0) {
+            double headup = v.heading+1.0;
+            double headlow = v.heading-1.0;
+            quint32 headingUpper = static_cast<qint32>(headup);
+            quint32 headingLower = static_cast<qint32>(headlow);
+            variedHeading = QRandomGenerator::global()->bounded(headingLower, headingUpper);
+        }
+        else {
+            variedHeading = QRandomGenerator::global()->bounded(0, 1);
+        }
+        v.heading = static_cast<double>(variedHeading);
+        }
 
         // Speed conversion: km/h -> m/s
         const double distPerSecond = v.speed / 3.6;

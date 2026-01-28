@@ -999,6 +999,8 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
     entityList->setFont(entityFont);
 
     QListWidgetItem *distanceItem = new QListWidgetItem;
+    QListWidgetItem *speedItem = new QListWidgetItem;
+    QListWidgetItem *headingItem = new QListWidgetItem;
 
     for (const auto& vehicle : tacticalVehicleDb->vehicles()) {
         if (vehicle.callsign == extractedCallsign) {
@@ -1058,8 +1060,10 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
             new QListWidgetItem(dTyp, entityList);
             distanceItem->setText(dDist);
             entityList->insertItem(7, distanceItem);
-            new QListWidgetItem(dSpe, entityList);
-            new QListWidgetItem(dHea, entityList);
+            speedItem->setText(dSpe);
+            entityList->insertItem(8, speedItem);
+            speedItem->setText(dHea);
+            entityList->insertItem(9, headingItem);
             new QListWidgetItem(dFue, entityList);
             new QListWidgetItem(dAmm, entityList);
             new QListWidgetItem(dUnm, entityList);
@@ -1084,6 +1088,8 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
         for (const auto &vehicleUpdate : tacticalVehicleDb->vehicles()) {
             if (vehicleUpdate.callsign == extractedCallsign && entityLiveUpdatesBox->isChecked()) {
                 distanceItem->setText("Distance to target: " +QString::number(vehicleUpdate.distanceToTarget, 'f', 0) + "m");
+                speedItem->setText   ("Speed:              " + QString::number(vehicleUpdate.speed, 'f', 0) + "km/h");
+                headingItem->setText ("Heading:            " + QString::number(vehicleUpdate.heading, 'f', 0) + "°");
             }
         }
     });

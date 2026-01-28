@@ -78,10 +78,13 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         // --- Technical Specs & Telemetry Baseline ---
         v.protectionLevel  = obj["protectionLevel"].toInt();
         v.speed            = obj["speed"].toDouble();
+        v.maxSpeed         = obj["maxSpeed"].toDouble();
+        v.targetSpeed      = obj["targetSpeed"].toDouble();
         v.fuelLevel        = obj["fuelLevel"].toDouble();
         v.ammunitionLevel  = obj["ammunitionLevel"].toDouble();
         v.posX             = obj["posX"].toDouble();
         v.posY             = obj["posY"].toDouble();
+        v.heading          = obj["heading"].toDouble();
 
         // Distance is dynamically updated by the simulation engine
         v.distanceToTarget = 0.0;

@@ -24,6 +24,7 @@ struct TacticalVehicle {
     // --- Technical Specifications ---
     int protectionLevel = 0; ///< STANAG 4569 ballistic protection level (1–6)
     double maxSpeed = 0.0;   ///< Maximum rated speed (km/h)
+    double targetSpeed = 0.0;
     QString natoIcon;        ///< APP-6 / MIL-STD-2525 symbol identifier
 
     // --- Operational Capabilities ---
