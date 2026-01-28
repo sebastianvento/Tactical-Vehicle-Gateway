@@ -687,6 +687,11 @@ void MainWindow::onSimulationTick() {
     const double targetX = targetXLine->text().toDouble();
     const double targetY = targetYLine->text().toDouble();
     controller->updateSimulation(targetX, targetY);
+    if (resultsList->count() > 0) {
+        manualUpdateRequested = true;
+        printList();
+        manualUpdateRequested = false;
+    }
 }
 
 // --- Sorting Logic ---
@@ -907,7 +912,6 @@ void MainWindow::printList() {
 
 // --- Dialog Logic  ---
 // Slot responsible for entity dialog.
-
 void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
     entityDialog = new QDialog(this);
     entityDialog->show();
@@ -915,9 +919,12 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
     entityDialog->activateWindow();
     entityDialog->setSizeGripEnabled(true);
     entityDialog->setBaseSize(375, 375);
+
     QString extractedCallsign = item->text().section(' ', 0, 0);
+
     QListWidget *entityList = new QListWidget();
     entityList->setSelectionMode(QAbstractItemView::NoSelection);
+
     QVBoxLayout *entityLayout = new QVBoxLayout();
     entityLayout->addWidget(entityList);
     entityDialog->setLayout(entityLayout);
@@ -925,6 +932,8 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
     QFont entityFont("Lucida Console", 12);
     entityFont.setStyleHint(QFont::Monospace);
     entityList->setFont(entityFont);
+
+    QListWidgetItem *distanceItem = new QListWidgetItem;
 
     for (const auto& vehicle : tacticalVehicleDb->vehicles()) {
         if (vehicle.callsign == extractedCallsign) {
@@ -970,17 +979,20 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
             else {
                 dAmp = "No";
             }
+
             dAmp =           ("Is Amphibious:      " + dAmp);
             QString dProt =  ("Protection Level:   " + QString::number(vehicle.protectionLevel, 'f', 0));
             QString dMSpe =  ("Maximum Speed       " + QString::number(vehicle.maxSpeed, 'f', 0) + "km/h");
             QString dProp =  ("Propulsion          " + vehicle.propulsion);
+
             new QListWidgetItem(dCall, entityList);
             new QListWidgetItem(dTrack, entityList);
             new QListWidgetItem(dPrio, entityList);
             new QListWidgetItem(dClas, entityList);
             new QListWidgetItem(dDom, entityList);
             new QListWidgetItem(dTyp, entityList);
-            new QListWidgetItem(dDist, entityList);
+            distanceItem->setText(dDist);
+            entityList->insertItem(7, distanceItem);
             new QListWidgetItem(dSpe, entityList);
             new QListWidgetItem(dHea, entityList);
             new QListWidgetItem(dFue, entityList);
@@ -1000,9 +1012,16 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
             } else {
                 entityList->setStyleSheet("QListWidget { color: white; }");
             }
+
         }
     }
-
+    connect(simTimer, &QTimer::timeout, entityDialog, [=]() {
+        for (const auto &vehicleUpdate : tacticalVehicleDb->vehicles()) {
+            if (vehicleUpdate.callsign == extractedCallsign) {
+                distanceItem->setText("Distance to target: " +QString::number(vehicleUpdate.distanceToTarget, 'f', 0) + "m");
+            }
+        }
+    });
 }
 
 MainWindow::~MainWindow() {
