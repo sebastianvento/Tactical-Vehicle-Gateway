@@ -982,8 +982,8 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
 
             dAmp =           ("Is Amphibious:      " + dAmp);
             QString dProt =  ("Protection Level:   " + QString::number(vehicle.protectionLevel, 'f', 0));
-            QString dMSpe =  ("Maximum Speed       " + QString::number(vehicle.maxSpeed, 'f', 0) + "km/h");
-            QString dProp =  ("Propulsion          " + vehicle.propulsion);
+            QString dMSpe =  ("Maximum Speed:      " + QString::number(vehicle.maxSpeed, 'f', 0) + "km/h");
+            QString dProp =  ("Propulsion:         " + vehicle.propulsion);
 
             new QListWidgetItem(dCall, entityList);
             new QListWidgetItem(dTrack, entityList);

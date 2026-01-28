@@ -37,10 +37,10 @@ public:
 
 private slots:
     // --- Core Logic ---
-    void displayButtonClicked();    ///< Explicit trigger to refresh displayed results
-    void filterFunction();          ///< Resolves UI state into filter criteria
-    void printList();               ///< Populates resultsList from current data view
-    void listItemDoubleclicked(QListWidgetItem *item);            ///< Shows dialog with entity info when QListWidget item clicked.
+    void displayButtonClicked();                       ///< Explicit trigger to refresh displayed results
+    void filterFunction();                             ///< Resolves UI state into filter criteria
+    void printList();                                  ///< Populates resultsList from current data view
+    void listItemDoubleclicked(QListWidgetItem *item); ///< Shows dialog with entity info when QListWidget item clicked.
 
     // --- Identity & Search Management ---
     void callsignChanged(const QString& text);
