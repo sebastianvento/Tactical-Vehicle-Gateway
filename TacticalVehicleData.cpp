@@ -18,7 +18,7 @@ TacticalVehicleData::TacticalVehicleData() {
 
 // --- Data Ingestion & Database Population ---
 /**
- * @brief Parses tactical data from a JSON file and initializes internal containers.
+ * @brief Parses data from a JSON file and initializes internal containers.
  *
  * This function fully resets the internal dataset before loading to ensure
  * no stale or partially-loaded data remains.

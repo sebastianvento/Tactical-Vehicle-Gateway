@@ -52,7 +52,7 @@ struct FilterCriteria {
 
     // NOTE: distanceMax == 10000 is intentionally treated as "no upper bound".
     // This is a UI-driven convention used to expose all entities when the
-    // distance slider is at its maximum. This is a deliberate, controlled shortcut.
+    // distance slider is at its maximum. This is a deliberate shortcut.
     int distanceMin = 0;
     int distanceMax = 10000;
 

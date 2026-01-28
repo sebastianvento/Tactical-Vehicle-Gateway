@@ -131,7 +131,7 @@ void TacticalVehicleController::applyFilter(const FilterCriteria& criteria) {
  * it returns true when the filtered view differs from the full vehicle dataset.
  *
  * Note:
- * - This does NOT represent user filter intent.
+ * - This does not represent user filter intent.
  * - If filter criteria are applied but happen to match all vehicles,
  *   this function will return false.
  *

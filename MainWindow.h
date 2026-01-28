@@ -21,7 +21,7 @@ class TacticalVehicleData;
 
 /**
  * @class MainWindow
- * @brief Primary tactical UI controller for vehicle monitoring and filtering.
+ * @brief Primary UI controller for vehicle monitoring and filtering.
  *
  * Owns all UI state and presentation logic, delegates domain logic
  * (filtering, simulation) to TacticalVehicleController.
