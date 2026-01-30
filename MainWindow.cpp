@@ -746,7 +746,14 @@ void MainWindow::onSimulationTick() {
     controller->updateSimulation(targetX, targetY);
     if (resultsList->count() > 0 && liveUpdatesBox->isChecked()) {
         manualUpdateRequested = true;
-        printList();
+        if (sortButton->text() == "Distance: Closest First") {
+            sortByDistanceAsc();
+        }
+        if (sortButton->text() == "Distance: Farthest First") {
+            sortByDistanceDesc();
+        } else {
+            printList();
+        }
         manualUpdateRequested = false;
     }
 }
@@ -756,9 +763,6 @@ void MainWindow::onSimulationTick() {
 void MainWindow::updateSortStatus() {
     printList();
     QString buttonText = sortButton->text();
-    QFontMetrics metrics(sortButton->font());
-    QString elidedText = metrics.elidedText(buttonText, Qt::ElideRight, sortButton->width() - 10);
-    sortButton->setText(elidedText);
     sortButton->setToolTip(buttonText);
 }
 
@@ -908,7 +912,6 @@ void MainWindow::displayButtonClicked() {
     printList();
     sortByDistanceAsc();
     manualUpdateRequested = false;
-    sortButton->setText("Sort");
 }
 
 void MainWindow::printList() {
