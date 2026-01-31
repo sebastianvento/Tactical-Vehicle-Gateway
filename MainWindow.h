@@ -95,6 +95,21 @@ private slots:
     void onSimulationTick();        ///< Periodic update for dynamic asset data
 
 private:
+    // --- Sort Modes ---
+    enum class SortMode {
+        None,
+        DistanceAsc,
+        DistanceDesc,
+        FuelAsc,
+        FuelDesc,
+        PriorityAsc,
+        PriorityDesc,
+        ClassificationAsc,
+        ClassificationDesc
+    };
+
+    SortMode currentSortMode = SortMode::None;
+
     // --- Backend Data & Controllers ---
     std::unique_ptr<TacticalVehicleData> tacticalVehicleDb;
     std::unique_ptr<TacticalVehicleController> controller;
@@ -103,6 +118,22 @@ private:
     QStringList callsignList;
 
     bool manualUpdateRequested = false; ///< Guards explicit list rendering phases
+
+    bool callsignFilterActive = false;
+    bool trackIdFilterActive = false;
+    bool domainFilterActive = false;
+    bool propulsionFilterActive = false;
+    bool priorityFilterActive = false;
+    bool protectionMinFilterActive = false;
+    bool protectionMaxFilterActive = false;
+    QString activeCallsign;
+    QString activeTrackId;
+    QString activeAffiliation = "All Types";
+    QString activeDomain;
+    QString activePropulsion;
+    QString activePriority;
+    int activeProtectionMin;
+    int activeProtectionMax;
 
     // --- Capability Flags ---
     QCheckBox *cbHasActiveDefense;

@@ -43,6 +43,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     controller = std::make_unique<TacticalVehicleController>(*tacticalVehicleDb);
     tacticalVehicleDb->loadVehiclesFromJson(":/data/vehicles.json");
     choiceDeletion = QIcon::fromTheme(QIcon::ThemeIcon::WindowClose);
+    currentSortMode = SortMode::DistanceAsc;
 
     setMinimumSize(1000, 720);
     this->resize(1000, 750);
@@ -381,27 +382,27 @@ void MainWindow::filterFunction() {
     criteria.hasActiveDefense = cbHasActiveDefense->isChecked();
 
     // --- Identity Filters ---
-    criteria.callsignActive = callsignSelectionPressed_Btn->isVisible();
-    criteria.callsign = callsignSelectionPressed_Btn->text();
-    criteria.trackIdActive = trackIdSelectionPressed_Btn->isVisible();
-    criteria.trackId = trackIdSelectionPressed_Btn->text();
+    criteria.callsignActive = callsignFilterActive;
+    criteria.callsign = activeCallsign;
+    criteria.trackIdActive = trackIdFilterActive;
+    criteria.trackId = activeTrackId;
 
     // --- Strategic Classification ---
-    criteria.domainActive = domainButtonSelectionPressed_Btn->isVisible();
-    criteria.domain = domainButtonSelectionPressed_Btn->text();
+    criteria.domainActive = domainFilterActive;
+    criteria.domain = activeDomain;
 
-    criteria.propulsionActive = propulsionSelectionPressed_Btn->isVisible();
-    criteria.propulsion = propulsionSelectionPressed_Btn->text();
+    criteria.propulsionActive = propulsionFilterActive;
+    criteria.propulsion = activePropulsion;
 
-    criteria.priorityActive = prioritySelectionPressed_Btn->isVisible();
-    criteria.priority = prioritySelectionPressed_Btn->text();
+    criteria.priorityActive = priorityFilterActive;
+    criteria.priority = activePriority;
 
     // --- Protection Constraints ---
-    criteria.protectionMinActive = protectionSelectionMinPressed_Btn->isVisible();
-    criteria.protectionMin = protectionSelectionMinPressed_Btn->text().toInt();
+    criteria.protectionMinActive = protectionMinFilterActive;
+    criteria.protectionMin = activeProtectionMin;
 
-    criteria.protectionMaxActive = protectionSelectionMaxPressed_Btn->isVisible();
-    criteria.protectionMax = protectionSelectionMaxPressed_Btn->text().toInt();
+    criteria.protectionMaxActive = protectionMaxFilterActive;
+    criteria.protectionMax = activeProtectionMax;
 
     // --- Telemetry Ranges ---
     criteria.fuelMin = fuelSlider->lowerValue();
@@ -410,7 +411,7 @@ void MainWindow::filterFunction() {
     criteria.distanceMax = distanceSlider->upperValue();
 
     // --- Affiliation ---
-    criteria.affiliation = affiliationButton->text();
+    criteria.affiliation = activeAffiliation;
 
     controller->applyFilter(criteria);
 
@@ -435,12 +436,30 @@ void MainWindow::filtersCleared() {
     cbHasActiveDefense->setCheckState(Qt::Unchecked);
 
     // --- Identity Filters ---
+    callsignFilterActive = false;
+    activeCallsign.clear();
+
+    trackIdFilterActive = false;
+    activeTrackId.clear();
+
     callsignSelectionPressed_Btn->setVisible(false);
+    callsignSelectionPressed_Btn->setText("");
     callsignLine->setText("");
+
     trackIdSelectionPressed_Btn->setVisible(false);
+    trackIdSelectionPressed_Btn->setText("");
     trackIdLine->setText("");
 
     // --- Strategic Classification ---
+    domainFilterActive = false;
+    activeDomain.clear();
+
+    propulsionFilterActive = false;
+    activePropulsion.clear();
+
+    priorityFilterActive = false;
+    activePriority.clear();
+
     domainButtonSelectionPressed_Btn->setVisible(false);
     domainButtonSelectionPressed_Btn->setText("");
     domainButton->setText("Select Domain");
@@ -454,6 +473,12 @@ void MainWindow::filtersCleared() {
     priorityButton->setText("Set Priority");
 
     // --- Protection Constraints ---
+    protectionMinFilterActive = false;
+    activeProtectionMin = 0;
+
+    protectionMaxFilterActive = false;
+    activeProtectionMax = 0;
+
     protectionSelectionMinPressed_Btn->setVisible(false);
     protectionSelectionMinPressed_Btn->setText("");
     protectionButtonMin->setText("Min Level");
@@ -461,6 +486,10 @@ void MainWindow::filtersCleared() {
     protectionSelectionMaxPressed_Btn->setVisible(false);
     protectionSelectionMaxPressed_Btn->setText("");
     protectionButtonMax->setText("Max Level");
+
+    for (QAction *action : protectionMenuMax->actions()) {
+        action->setVisible(true);
+    }
 
     // --- Telemetry Ranges ---
     fuelInputMin->setText("0");
@@ -472,6 +501,7 @@ void MainWindow::filtersCleared() {
 
     // --- Affiliation ---
     affiliationButton->setText("All Types");
+    activeAffiliation = "All Types";
 
     filterFunction();
 }
@@ -479,22 +509,29 @@ void MainWindow::filtersCleared() {
 // --- UI Input Logic ---
 // Slots responsible for translating direct user interaction into UI state changes.
 void MainWindow::callsignChanged(const QString &callsignText) {
-    QString callsignFormatted = callsignText;
-    if (!callsignText.isEmpty()) {
-        callsignFormatted[0] = callsignFormatted[0].toUpper();
-        if (callsignList.contains(callsignFormatted, Qt::CaseInsensitive)) {
-            callsignSelectionPressed_Btn->setVisible(true);
-            callsignSelectionPressed_Btn->setText(callsignFormatted);
-            callsignSelectionPressed_Btn->adjustSize();
-            filterFunction();
-        } else {
-            callsignSelectionPressed_Btn->setVisible(false);
-            filterFunction();
-        }
-    } else {
-        callsignSelectionPressed_Btn->setVisible(false);
-        filterFunction();
+    QString formatted = callsignText;
+
+    if (!formatted.isEmpty()) {
+        formatted = formatted.toUpper();
     }
+
+    if (!formatted.isEmpty() &&
+        callsignList.contains(formatted, Qt::CaseInsensitive)) {
+
+        callsignFilterActive = true;
+        activeCallsign = formatted;
+
+        callsignSelectionPressed_Btn->setVisible(true);
+        callsignSelectionPressed_Btn->setText(formatted);
+        callsignSelectionPressed_Btn->adjustSize();
+    } else {
+        callsignFilterActive = false;
+        activeCallsign.clear();
+
+        callsignSelectionPressed_Btn->setVisible(false);
+    }
+
+    filterFunction();
 }
 
 void MainWindow::callsignReturnPressed() {
@@ -505,26 +542,39 @@ void MainWindow::callsignReturnPressed() {
 }
 
 void MainWindow::callsignSelectionPressed() {
+    callsignFilterActive = false;
+    activeCallsign.clear();
+
+    callsignSelectionPressed_Btn->setVisible(false);
     callsignLine->setText("");
+
+    filterFunction();
 }
 
 void MainWindow::trackIdChanged(const QString &trackIdText) {
-    QString trackIdFormatted = trackIdText;
-    if (!trackIdText.isEmpty()) {
-        trackIdFormatted = trackIdFormatted.toUpper();
-        if (trackIdList.contains(trackIdFormatted, Qt::CaseInsensitive)) {
-            trackIdSelectionPressed_Btn->setVisible(true);
-            trackIdSelectionPressed_Btn->setText(trackIdFormatted);
-            trackIdSelectionPressed_Btn->adjustSize();
-            filterFunction();
-        } else {
-            trackIdSelectionPressed_Btn->setVisible(false);
-            filterFunction();
-        }
-    } else {
-        trackIdSelectionPressed_Btn->setVisible(false);
-        filterFunction();
+    QString formatted = trackIdText;
+
+    if (!formatted.isEmpty()) {
+        formatted = formatted.toUpper();
     }
+
+    if (!formatted.isEmpty() &&
+        trackIdList.contains(formatted, Qt::CaseInsensitive)) {
+
+        trackIdFilterActive = true;
+        activeTrackId = formatted;
+
+        trackIdSelectionPressed_Btn->setVisible(true);
+        trackIdSelectionPressed_Btn->setText(formatted);
+        trackIdSelectionPressed_Btn->adjustSize();
+    } else {
+        trackIdFilterActive = false;
+        activeTrackId.clear();
+
+        trackIdSelectionPressed_Btn->setVisible(false);
+    }
+
+    filterFunction();
 }
 
 void MainWindow::trackIdReturnPressed() {
@@ -535,131 +585,170 @@ void MainWindow::trackIdReturnPressed() {
 }
 
 void MainWindow::trackIdSelectionPressed() {
+    trackIdFilterActive = false;
+    activeTrackId.clear();
+
+    trackIdSelectionPressed_Btn->setVisible(false);
     trackIdLine->setText("");
+
+    filterFunction();
 }
 
 void MainWindow::affiliationActionClicked(QAction* action) {
-    affiliationButton->setText(action->text());
+    activeAffiliation = action->text();
+    affiliationButton->setText(activeAffiliation);
     filterFunction();
 }
 
 void MainWindow::domainActionClicked(QAction* action) {
-    domainButton->setText(action->text());
-    domainButtonSelectionPressed_Btn->setVisible(true);
-    domainButtonSelectionPressed_Btn->setText(action->text());
-    domainButtonSelectionPressed_Btn->adjustSize();
+    domainFilterActive = true;
+    activeDomain = action->text();
 
-    QString buttonText = domainButton->text();
-    QFontMetrics metrics(domainButton->font());
-    QString shortenedText = metrics.elidedText(buttonText, Qt::ElideRight, domainButton->width() - 10);
-    domainButton->setText(shortenedText);
-    domainButton->setToolTip(buttonText);
+    domainButtonSelectionPressed_Btn->setVisible(true);
+    if (domainButtonSelectionPressed_Btn->text() != activeDomain) {
+        domainButtonSelectionPressed_Btn->setText(activeDomain);
+        domainButtonSelectionPressed_Btn->adjustSize();
+    }
+
+    domainButton->setText(activeDomain);
+
     filterFunction();
 }
 
 void MainWindow::domainSelectionPressed() {
+    domainFilterActive = false;
+    activeDomain.clear();
+
     domainButtonSelectionPressed_Btn->setVisible(false);
+    domainButtonSelectionPressed_Btn->setText("");
     domainButton->setText("Select Domain");
+
     filterFunction();
 }
 
 void MainWindow::propulsionActionClicked(QAction* action) {
-    propulsionButton->setText(action->text());
-    propulsionSelectionPressed_Btn->setVisible(true);
-    propulsionSelectionPressed_Btn->setText(action->text());
-    propulsionSelectionPressed_Btn->adjustSize();
+    propulsionFilterActive = true;
+    activePropulsion = action->text();
 
-    QString buttonText = propulsionButton->text();
-    QFontMetrics metrics(propulsionButton->font());
-    QString shortenedText = metrics.elidedText(buttonText, Qt::ElideRight, propulsionButton->width() - 10);
-    propulsionButton->setText(shortenedText);
-    propulsionButton->setToolTip(buttonText);
+    propulsionSelectionPressed_Btn->setVisible(true);
+    if (propulsionSelectionPressed_Btn->text() != activePropulsion) {
+        propulsionSelectionPressed_Btn->setText(activePropulsion);
+        propulsionSelectionPressed_Btn->adjustSize();
+    }
+
+    propulsionButton->setText(activePropulsion);
+
     filterFunction();
 }
 
 void MainWindow::propulsionSelectionPressed() {
+    propulsionFilterActive = false;
+    activePropulsion.clear();
+
     propulsionSelectionPressed_Btn->setVisible(false);
+    propulsionSelectionPressed_Btn->setText("");
     propulsionButton->setText("Select Type");
+
     filterFunction();
 }
 
-void MainWindow::priorityActionClicked(QAction* action){
-    priorityButton->setText(action->text());
-    prioritySelectionPressed_Btn->setVisible(true);
-    prioritySelectionPressed_Btn->setText(action->text());
-    prioritySelectionPressed_Btn->adjustSize();
+void MainWindow::priorityActionClicked(QAction* action) {
+    priorityFilterActive = true;
+    activePriority = action->text();
 
-    QString buttonText = priorityButton->text();
-    QFontMetrics metrics(priorityButton->font());
-    QString shortenedText = metrics.elidedText(buttonText, Qt::ElideRight, priorityButton->width() - 10);
-    priorityButton->setText(shortenedText);
-    priorityButton->setToolTip(buttonText);
+    prioritySelectionPressed_Btn->setVisible(true);
+    if (prioritySelectionPressed_Btn->text() != activePriority) {
+        prioritySelectionPressed_Btn->setText(activePriority);
+        prioritySelectionPressed_Btn->adjustSize();
+    }
+
+    priorityButton->setText(activePriority);
+
     filterFunction();
 }
 
 void MainWindow::prioritySelectionPressed() {
+    priorityFilterActive = false;
+    activePriority.clear();
+
     prioritySelectionPressed_Btn->setVisible(false);
+    prioritySelectionPressed_Btn->setText("");
     priorityButton->setText("Set Priority");
+
     filterFunction();
 }
 
 void MainWindow::protectionMenuMinClicked(QAction* action) {
-    protectionButtonMin->setText(action->text());
+    protectionMinFilterActive = true;
+    activeProtectionMin = action->text().toInt();
+
     protectionSelectionMinPressed_Btn->setVisible(true);
-    protectionSelectionMinPressed_Btn->setText(action->text());
-    protectionSelectionMinPressed_Btn->adjustSize();
+    if (protectionSelectionMinPressed_Btn->text() != action->text()) {
+        protectionSelectionMinPressed_Btn->setText(action->text());
+        protectionSelectionMinPressed_Btn->adjustSize();
+    }
 
-    QString buttonText = protectionButtonMin->text();
-    QFontMetrics metrics(protectionButtonMin->font());
-    QString shortenedText = metrics.elidedText(buttonText, Qt::ElideRight, protectionButtonMin->width() - 10);
-    protectionButtonMin->setText(shortenedText);
-    protectionButtonMin->setToolTip(buttonText);
+    protectionButtonMin->setText(action->text());
 
-    if (protectionSelectionMaxPressed_Btn->isVisible() && protectionButtonMin->text().toInt() > protectionButtonMax->text().toInt()) {
+    if (protectionMaxFilterActive &&
+        activeProtectionMin > activeProtectionMax) {
         protectionSelectionMaxPressed();
     }
 
     for (QAction *act : protectionMenuMax->actions()) {
         act->setVisible(true);
     }
-    int minThreshold = protectionButtonMin->text().toInt();
-    for (QAction* act : protectionMenuMax->actions()) {
-        if (act->text().toInt() < minThreshold) {
+
+    for (QAction *act : protectionMenuMax->actions()) {
+        if (act->text().toInt() < activeProtectionMin) {
             act->setVisible(false);
         }
     }
+
     filterFunction();
 }
 
 void MainWindow::protectionMenuMaxClicked(QAction* action) {
-    protectionButtonMax->setText(action->text());
-    protectionSelectionMaxPressed_Btn->setVisible(true);
-    protectionSelectionMaxPressed_Btn->setText(action->text());
-    protectionSelectionMaxPressed_Btn->adjustSize();
+    protectionMaxFilterActive = true;
+    activeProtectionMax = action->text().toInt();
 
-    QString buttonText = protectionButtonMax->text();
-    QFontMetrics metrics(protectionButtonMax->font());
-    QString shortenedText = metrics.elidedText(buttonText, Qt::ElideRight, protectionButtonMax->width() - 10);
-    protectionButtonMax->setText(shortenedText);
-    protectionButtonMax->setToolTip(buttonText);
+    protectionSelectionMaxPressed_Btn->setVisible(true);
+    if (protectionSelectionMaxPressed_Btn->text() != action->text()) {
+        protectionSelectionMaxPressed_Btn->setText(action->text());
+        protectionSelectionMaxPressed_Btn->adjustSize();
+    }
+
+    protectionButtonMax->setText(action->text());
 
     filterFunction();
 }
 
 void MainWindow::protectionSelectionMinPressed() {
+    protectionMinFilterActive = false;
+    activeProtectionMin = 0;
+
     protectionSelectionMinPressed_Btn->setVisible(false);
+    protectionSelectionMinPressed_Btn->setText("");
     protectionButtonMin->setText("Min Level");
+
     for (QAction *action : protectionMenuMax->actions()) {
         action->setVisible(true);
     }
+
     filterFunction();
 }
 
 void MainWindow::protectionSelectionMaxPressed() {
+    protectionMaxFilterActive = false;
+    activeProtectionMax = 0;
+
     protectionSelectionMaxPressed_Btn->setVisible(false);
+    protectionSelectionMaxPressed_Btn->setText("");
     protectionButtonMax->setText("Max Level");
+
     filterFunction();
 }
+
 void MainWindow::distanceSliderChanged(int x, int y) {
     distanceInputMin->blockSignals(true);
     distanceInputMax->blockSignals(true);
@@ -675,6 +764,7 @@ void MainWindow::distanceSliderChanged(int x, int y) {
     }
     distanceInputMin->blockSignals(false);
     distanceInputMax->blockSignals(false);
+
     filterFunction();
 }
 
@@ -691,6 +781,7 @@ void MainWindow::distanceInputMinChanged(const QString &distanceString) {
         if (ok) distanceSlider->setValues(val, distanceSlider->upperValue());
     }
     distanceSlider->blockSignals(false);
+
     filterFunction();
 }
 
@@ -717,6 +808,7 @@ void MainWindow::distanceInputMaxChanged(const QString &distanceString) {
         }
     }
     distanceSlider->blockSignals(false);
+
     filterFunction();
 }
 
@@ -735,6 +827,7 @@ void MainWindow::fuelSliderChanged(int x, int y) {
     }
     fuelInputMin->blockSignals(false);
     fuelInputMax->blockSignals(false);
+
     filterFunction();
 }
 
@@ -751,6 +844,7 @@ void MainWindow::fuelInputMinChanged(const QString &fuelString) {
         if (ok) fuelSlider->setValues(val, fuelSlider->upperValue());
     }
     fuelSlider->blockSignals(false);
+
     filterFunction();
 }
 
@@ -767,6 +861,7 @@ void MainWindow::fuelInputMaxChanged(const QString &fuelString) {
         if (ok) fuelSlider->setValues(fuelSlider->lowerValue(), val);
     }
     fuelSlider->blockSignals(false);
+
     filterFunction();
 }
 
@@ -778,13 +873,16 @@ void MainWindow::onSimulationTick() {
     controller->updateSimulation(targetX, targetY);
     if (resultsList->count() > 0 && liveUpdatesBox->isChecked()) {
         manualUpdateRequested = true;
-        if (sortButton->text() == "Distance: Closest First") {
+        switch (currentSortMode) {
+        case SortMode::DistanceAsc:
             sortByDistanceAsc();
-        }
-        else if (sortButton->text() == "Distance: Farthest First") {
+            break;
+        case SortMode::DistanceDesc:
             sortByDistanceDesc();
-        } else {
+            break;
+        default:
             printList();
+            break;
         }
         manualUpdateRequested = false;
     }
@@ -793,131 +891,162 @@ void MainWindow::onSimulationTick() {
 // --- Sorting Logic ---
 // UI-driven handlers for ordering asset views by operational metrics.
 void MainWindow::sortByFuelAsc() {
-    if (resultsList->count() == 0) return;
-
-    auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->vehiclesMutable();
-
-    if (controller->isFilterActive()) {
-        std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelAsc);
-    } else {
-        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelAsc(&a, &b); });
-    }
-    sortButton->setText("Fuel: Critical First");
+    currentSortMode = SortMode::FuelAsc;
     manualUpdateRequested = true;
-    printList();
+
+    if (resultsList->count() > 0) {
+
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelAsc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelAsc(&a, &b); });
+        }
+        sortButton->setText("Fuel: Critical First");
+        printList();
+    }
+    manualUpdateRequested = false;
 }
 
 void MainWindow::sortByFuelDesc() {
-    if (resultsList->count() == 0) return;
-
-    auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->vehiclesMutable();
-
-    if (controller->isFilterActive()) {
-        std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelDesc);
-    } else {
-        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelDesc(&a, &b); });
-    }
-    sortButton->setText("Fuel: Full First");
+    currentSortMode = SortMode::FuelDesc;
     manualUpdateRequested = true;
-    printList();
+
+    if (resultsList->count() > 0) {
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelDesc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelDesc(&a, &b); });
+        }
+        sortButton->setText("Fuel: Full First");
+        printList();
+    }
+    manualUpdateRequested = false;
 }
 
 void MainWindow::sortByPriorityAsc() {
-    if (resultsList->count() == 0) return;
-
-    auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->vehiclesMutable();
-
-    if (controller->isFilterActive()) {
-        std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByPriorityAsc);
-    } else {
-        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByPriorityAsc(&a, &b); });
-    }
-    sortButton->setText("Priority (A-Z)");
+    currentSortMode = SortMode::PriorityAsc;
     manualUpdateRequested = true;
-    printList();
+
+    if (resultsList->count() > 0) {
+
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByPriorityAsc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByPriorityAsc(&a, &b); });
+        }
+        sortButton->setText("Priority (A-Z)");
+        printList();
+    }
+    manualUpdateRequested = false;
 }
 
 void MainWindow::sortByPriorityDesc() {
-    if (resultsList->count() == 0) return;
-
-    auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->vehiclesMutable();
-
-    if (controller->isFilterActive()) {
-        std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByPriorityDesc);
-    } else {
-        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByPriorityDesc(&a, &b); });
-    }
-    sortButton->setText("Priority (Z-A)");
+    currentSortMode = SortMode::PriorityDesc;
     manualUpdateRequested = true;
-    printList();
+
+    if (resultsList->count() > 0) {
+
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByPriorityDesc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByPriorityDesc(&a, &b); });
+        }
+        sortButton->setText("Priority (Z-A)");
+        printList();
+    }
+    manualUpdateRequested = false;
 }
 
 void MainWindow::sortByClassificationAsc() {
-    if (resultsList->count() == 0) return;
-
-    auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->vehiclesMutable();
-
-    if (controller->isFilterActive()) {
-        std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByClassificationAsc);
-    } else {
-        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByClassificationAsc(&a, &b); });
-    }
-    sortButton->setText("Classification (A-Z)");
+    currentSortMode = SortMode::ClassificationAsc;
     manualUpdateRequested = true;
-    printList();
+
+    if (resultsList->count() > 0) {
+
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByClassificationAsc);
+        } else {
+           std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByClassificationAsc(&a, &b); });
+        }
+        sortButton->setText("Classification (A-Z)");
+        printList();
+    }
+    manualUpdateRequested = false;
 }
 
 void MainWindow::sortByClassificationDesc() {
-    if (resultsList->count() == 0) return;
-
-    auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->vehiclesMutable();
-
-    if (controller->isFilterActive()) {
-        std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByClassificationDesc);
-    } else {
-        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByClassificationDesc(&a, &b); });
-    }
-    sortButton->setText("Classification (Z-A)");
+    currentSortMode = SortMode::ClassificationDesc;
     manualUpdateRequested = true;
-    printList();
+
+    if (resultsList->count() > 0) {
+
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByClassificationDesc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByClassificationDesc(&a, &b); });
+        }
+        sortButton->setText("Classification (Z-A)");
+        printList();
+    }
+    manualUpdateRequested = false;
 }
 
 void MainWindow::sortByDistanceAsc() {
-    if (resultsList->count() == 0) return;
-
-    auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->vehiclesMutable();
-
-    if (controller->isFilterActive()) {
-        std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceAsc);
-    } else {
-        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceAsc(&a, &b); });
-    }
-    sortButton->setText("Distance: Closest First");
+    currentSortMode = SortMode::DistanceAsc;
     manualUpdateRequested = true;
-    printList();
+
+    if (resultsList->count() > 0) {
+
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceAsc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceAsc(&a, &b); });
+        }
+        sortButton->setText("Distance: Closest First");
+        printList();
+    }
+    manualUpdateRequested = false;
 }
 
 void MainWindow::sortByDistanceDesc() {
-    if (resultsList->count() == 0) return;
-
-    auto& fv = controller->filteredVehicles;
-    auto& av = tacticalVehicleDb->vehiclesMutable();
-
-    if (controller->isFilterActive()) {
-        std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceDesc);
-    } else {
-        std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceDesc(&a, &b); });
-    }
-    sortButton->setText("Distance: Farthest First");
+    currentSortMode = SortMode::DistanceDesc;
     manualUpdateRequested = true;
-    printList();
+
+    if (resultsList->count() > 0) {
+
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceDesc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceDesc(&a, &b); });
+        }
+        sortButton->setText("Distance: Farthest First");
+        printList();
+    }
+    manualUpdateRequested = false;
 }
 
 // --- Display Logic  ---
@@ -1104,9 +1233,8 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
 
         }
     }
+    QObject::disconnect(simTimer, nullptr, entityDialog, nullptr);
     connect(simTimer, &QTimer::timeout, entityDialog, [=]() {
-        if (!entityDialog || !entityDialog->isVisible()) return;
-
         for (const auto &vehicleUpdate : tacticalVehicleDb->vehicles()) {
             if (vehicleUpdate.callsign == extractedCallsign && entityLiveUpdatesBox->isChecked()) {
                 distanceItem->setText("Distance to target: " +QString::number(vehicleUpdate.distanceToTarget, 'f', 0) + " m");
