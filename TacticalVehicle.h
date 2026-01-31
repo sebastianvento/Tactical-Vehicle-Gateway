@@ -17,8 +17,8 @@ struct TacticalVehicle {
     QString type;            ///< Specific vehicle model or designation
     QString classification;  ///< Broad asset category
     QString affiliation;     ///< Hostility status (Friendly, Hostile, Neutral, Unknown)
-    QString priority;        ///< Strategic priority level (Flash (Immediate), High (Operational), Routine, Low (Deferred))
-    QString domain;          ///< Operational environment (Land, Sea, Air, Subsurface, Space, Cyber/Electronic)
+    QString priority;        ///< Strategic priority level (Flash, High, Routine, Low)
+    QString domain;          ///< Operational environment (Land, Sea, Air, Subsurface, Space, Electronic)
     QString propulsion;      ///< Locomotion method (Wheeled, Tracked, Legged, Aerial, Maritime)
 
     // --- Technical Specifications ---

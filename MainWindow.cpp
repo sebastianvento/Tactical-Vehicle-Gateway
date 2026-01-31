@@ -112,7 +112,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     domainMenu->addAction("Maritime");
     domainMenu->addAction("Subsurface");
     domainMenu->addAction("Space");
-    domainMenu->addAction("Cyber/Electronic");
+    domainMenu->addAction("Electronic");
     domainButton->setMenu(domainMenu);
     stratGrid->addWidget(domainButton, 0, 1);
     stratGrid->addWidget(domainButtonSelectionPressed_Btn = new QPushButton(), 0, 2);
@@ -136,10 +136,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     stratGrid->addWidget(new QLabel("Strategic Priority:"), 2, 0);
     priorityButton = new QPushButton("Set Priority");
     priorityMenu = new QMenu(this);
-    priorityMenu->addAction("Flash (Immediate)");
-    priorityMenu->addAction("High (Operational)");
+    priorityMenu->addAction("Flash");
+    priorityMenu->addAction("High");
     priorityMenu->addAction("Routine");
-    priorityMenu->addAction("Low (Deferred)");
+    priorityMenu->addAction("Low");
     priorityButton->setMenu(priorityMenu);
     stratGrid->addWidget(priorityButton, 2, 1);
     stratGrid->addWidget(prioritySelectionPressed_Btn = new QPushButton(), 2, 2);
@@ -447,7 +447,7 @@ void MainWindow::filtersCleared() {
 
     propulsionSelectionPressed_Btn->setVisible(false);
     propulsionSelectionPressed_Btn->setText("");
-    propulsionButton->setText("Select Propulsion");
+    propulsionButton->setText("Select Type");
 
     prioritySelectionPressed_Btn->setVisible(false);
     prioritySelectionPressed_Btn->setText("");
