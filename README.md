@@ -13,9 +13,9 @@
   Uses `QJsonDocument` for deterministic JSON ingestion. The architecture follows a **master–derived view pattern**:
   * Authoritative ownership in `std::deque<TacticalVehicle>`
   * Filtered views represented as `std::vector<const TacticalVehicle*>`  
-  This ensures memory safety, pointer stability, cache-friendly iteration, and zero duplication of vehicle data.
+  This ensures memory safety, pointer stability, cache-friendly iteration, and no duplication of vehicle data.
 
-* **Deterministic Simulation Engine**  
+* **Time-Stepped Simulation Engine**  
   A timed simulation heartbeat (`QTimer`) updates vehicle kinematics and recalculates distances relative to a user-defined mission target. Simulation logic is isolated in the controller layer and uses vector mathematics, trigonometry (`std::cos`, `std::sin`), and Euclidean distance calculations.
 
 * **Algorithmic Efficiency & Sorting**  
