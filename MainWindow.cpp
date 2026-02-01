@@ -122,7 +122,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     domainButtonSelectionPressed_Btn->setIcon(choiceDeletion);
     domainButtonSelectionPressed_Btn->setVisible(false);
 
-    stratGrid->addWidget(new QLabel("Locomotion Type:"), 1, 0);
+    stratGrid->addWidget(new QLabel("Propulsion Type:"), 1, 0);
     propulsionButton = new QPushButton("Select Type");
     propulsionMenu = new QMenu(this);
     propulsionMenu->addAction("Wheeled");
