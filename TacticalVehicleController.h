@@ -5,6 +5,7 @@
 
 #include <vector>
 
+// Forward declarations
 class TacticalVehicleData;
 struct TacticalVehicle;
 
@@ -50,9 +51,7 @@ struct FilterCriteria {
     int fuelMin = 0;
     int fuelMax = 100;
 
-    // NOTE: distanceMax == 10000 is intentionally treated as "no upper bound".
-    // This is a UI-driven convention used to expose all entities when the
-    // distance slider is at its maximum. This is a deliberate shortcut.
+    // NOTE: distanceMax == 10000 is treated as "no upper bound" (UI convention).
     int distanceMin = 0;
     int distanceMax = 10000;
 
@@ -75,6 +74,8 @@ public:
 
     // --- Filtering ---
     void applyFilter(const FilterCriteria& criteria);
+    bool matches(const TacticalVehicle& vehicle, const FilterCriteria& criteria) const;
+    int countMatches(const FilterCriteria& criteria) const;
     bool isFilterActive() const;
 
     // --- Simulation ---

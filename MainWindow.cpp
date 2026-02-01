@@ -3,7 +3,6 @@
 #include "RangeSlider.h"
 
 #include <QApplication>
-#include <QObject>
 #include <QPushButton>
 #include <QListWidget>
 #include <QCheckBox>
@@ -42,11 +41,13 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     tacticalVehicleDb = std::make_unique<TacticalVehicleData>();
     controller = std::make_unique<TacticalVehicleController>(*tacticalVehicleDb);
     tacticalVehicleDb->loadVehiclesFromJson(":/data/vehicles.json");
+
+    // --- INITIAL UI STATE ---
     choiceDeletion = QIcon::fromTheme(QIcon::ThemeIcon::WindowClose);
     currentSortMode = SortMode::DistanceAsc;
 
     setMinimumSize(1000, 720);
-    this->resize(1000, 750);
+    resize(1000, 750);
 
     // --- LAYOUT ARCHITECTURE ---
     QHBoxLayout *mainLayout = new QHBoxLayout(this);
@@ -57,9 +58,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     rightPanel->setSpacing(0);
 
     // --- LEFT PANEL: UI GROUPS ---
-    // Section: Operational Capabilities
+    // Capability Flags
     QGroupBox *capGroup = new QGroupBox("Operational Capabilities");
     QGridLayout *capGrid = new QGridLayout();
+
     capGrid->addWidget(new QLabel("SATCOM Link"), 0, 0);
     capGrid->addWidget(cbHasSatCom = new QCheckBox(), 1, 0);
     capGrid->addWidget(new QLabel("Amphibious"), 0, 1);
@@ -71,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     capGroup->setLayout(capGrid);
     leftPanel->addWidget(capGroup);
 
-    // Section: Asset Identity & Affiliation
+    // Identity Filters & Affiliation
     QGroupBox *idGroup = new QGroupBox("Asset Identity & Affiliation");
     QGridLayout *idGrid = new QGridLayout();
 
@@ -101,7 +103,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     idGroup->setLayout(idGrid);
     leftPanel->addWidget(idGroup);
 
-    // Section: Strategic Classification
+    // Strategic Classification
     QGroupBox *stratGroup = new QGroupBox("Strategic Classification");
     QGridLayout *stratGrid = new QGridLayout();
 
@@ -150,9 +152,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     stratGroup->setLayout(stratGrid);
     leftPanel->addWidget(stratGroup);
 
-    // Section: Protection Level
+    // Protection Constraints
     QGroupBox *protGroup = new QGroupBox("Protection Level (STANAG 4569)");
     QHBoxLayout *protLayout = new QHBoxLayout();
+
     protectionButtonMin = new QPushButton("Min Level");
     protectionButtonMax = new QPushButton("Max Level");
     protectionMenuMin = new QMenu(this);
@@ -174,9 +177,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     protGroup->setLayout(protLayout);
     leftPanel->addWidget(protGroup);
 
-    // Section: Telemetry & Target Inputs
+    // Telemetry Ranges & Target Inputs
     QGroupBox *teleGroup = new QGroupBox("Telemetry & Mission Target");
     QGridLayout *teleGrid = new QGridLayout();
+
     QIntValidator *fuelValidator = new QIntValidator(0,100, this);
     teleGrid->addWidget(new QLabel("Fuel Level (%):"), 0, 0);
     fuelSlider = new RangeSlider();
@@ -196,16 +200,19 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     teleGrid->addWidget(distanceSlider, 2, 1, 1, 2);
     teleGrid->addWidget(distanceInputMin = new QLineEdit("0"), 3, 1);
     distanceInputMin->setValidator(distanceValidator);
-    teleGrid->addWidget(distanceInputMax = new QLineEdit("MAX (No Limit)"), 3, 2);
+    teleGrid->addWidget(distanceInputMax = new QLineEdit("10000"), 3, 2);
     distanceInputMax->setValidator(distanceValidator);
+    distanceInputMax->blockSignals(true);
+    distanceInputMax->setText("MAX (No Limit)");
+    distanceInputMax->blockSignals(false);
 
+    QDoubleValidator *coordValidator = new QDoubleValidator(-999999.0, 999999.0, 2, this);
     teleGrid->addWidget(new QLabel("Target (X, Y):"), 4, 0);
     QHBoxLayout *coordLayout = new QHBoxLayout();
-    QDoubleValidator *coordValidator = new QDoubleValidator(-999999.0, 999999.0, 2, this);
-    targetXLine = new QLineEdit("0.00");
+    targetXLine = new QLineEdit("0");
     targetXLine->setPlaceholderText("X");
     targetXLine->setValidator(coordValidator);
-    targetYLine = new QLineEdit("0.00");
+    targetYLine = new QLineEdit("0");
     targetYLine->setPlaceholderText("Y");
     targetYLine->setValidator(coordValidator);
     coordLayout->addWidget(targetXLine);
@@ -215,9 +222,10 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     teleGroup->setLayout(teleGrid);
     leftPanel->addWidget(teleGroup);
 
-    // Section: Command Buttons
+    // Command Buttons
     leftPanel->addStretch();
-    displayButton = new QPushButton("DISPLAY RESULTS (" + QString::number(tacticalVehicleDb->vehicles().size()) + ")");
+    displayButton = new QPushButton("DISPLAY RESULTS (" + QString::number(tacticalVehicleDb->vehicles().size())
+                                    + " / " + QString::number(tacticalVehicleDb->vehicles().size()) + ")");
     displayButton->setMinimumHeight(50);
     displayButton->setStyleSheet(
         "QPushButton { background-color: #1a2a3a; color: white; border: 1px solid #334466; } "
@@ -225,7 +233,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
         "QPushButton:pressed { background-color: #111c26; }"
         );
 
-    QPushButton *exitButton = new QPushButton("EXIT SYSTEM");
+    exitButton = new QPushButton("EXIT SYSTEM");
     exitButton->setMinimumHeight(50);
     exitButton->setStyleSheet(
         "QPushButton { background-color: #2a2a2a; color: #cc5555; border: 1px solid #444; } "
@@ -258,7 +266,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     clearButton = new QPushButton("Clear all filters");
     QLabel *liveUpdateLabel = new QLabel("Live Updates");
     liveUpdateLabel->setContentsMargins(10, 0, 10, 0);
-    liveUpdatesBox = new QCheckBox;
+    liveUpdatesBox = new QCheckBox();
     sortBarLayout->setContentsMargins(0, 10, 0, 0);
     sortBarLayout->addWidget(clearButton);
     sortBarLayout->addWidget(liveUpdateLabel);
@@ -266,15 +274,22 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     sortBarLayout->addStretch();
     sortButton = new QPushButton("Sort");
     sortMenu = new QMenu(this);
-    QAction* actionDistAsc = new QAction("Distance: Closest First", this);
-    QAction* actionDistDesc = new QAction("Distance: Farthest First", this);
-    QAction* actionFuelAsc = new QAction("Fuel: Critical First", this);
-    QAction* actionFuelDesc = new QAction("Fuel: Full First", this);
-    QAction* actionPriorityAsc = new QAction("Priority (A-Z)", this);
-    QAction* actionPriorityDesc = new QAction("Priority (Z-A)", this);
-    QAction* actionClassAsc = new QAction("Classification (A-Z)", this);
-    QAction* actionClassDesc = new QAction("Classification (Z-A)", this);
-    sortMenu->addActions({actionDistAsc, actionDistDesc, actionFuelAsc, actionFuelDesc, actionPriorityAsc, actionPriorityDesc, actionClassAsc, actionClassDesc});
+    QAction *actionDistAsc = new QAction("Distance: Closest First", this);
+    QAction *actionDistDesc = new QAction("Distance: Farthest First", this);
+    QAction *actionFuelAsc = new QAction("Fuel: Critical First", this);
+    QAction *actionFuelDesc = new QAction("Fuel: Full First", this);
+    QAction *actionPriorityAsc = new QAction("Priority (A-Z)", this);
+    QAction *actionPriorityDesc = new QAction("Priority (Z-A)", this);
+    QAction *actionClassAsc = new QAction("Classification (A-Z)", this);
+    QAction *actionClassDesc = new QAction("Classification (Z-A)", this);
+    sortMenu->addAction(actionDistAsc);
+    sortMenu->addAction(actionDistDesc);
+    sortMenu->addAction(actionFuelAsc);
+    sortMenu->addAction(actionFuelDesc);
+    sortMenu->addAction(actionPriorityAsc);
+    sortMenu->addAction(actionPriorityDesc);
+    sortMenu->addAction(actionClassAsc);
+    sortMenu->addAction(actionClassDesc);
     sortButton->setMenu(sortMenu);
     sortBarLayout->addWidget(sortButton);
     rightPanel->addLayout(sortBarLayout);
@@ -289,13 +304,13 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     setLayout(mainLayout);
 
     // --- SIGNAL & SLOT CONNECTIONS ---
-    // Capability Toggles
-    connect(cbHasSatCom, &QCheckBox::toggled, this, &MainWindow::filterFunction);
-    connect(cbIsAmphibious, &QCheckBox::toggled, this, &MainWindow::filterFunction);
-    connect(cbIsUnmanned, &QCheckBox::toggled, this, &MainWindow::filterFunction);
-    connect(cbHasActiveDefense, &QCheckBox::toggled, this, &MainWindow::filterFunction);
+    // Capability Flags
+    connect(cbHasSatCom, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
+    connect(cbIsAmphibious, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
+    connect(cbIsUnmanned, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
+    connect(cbHasActiveDefense, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
 
-    // Search & Selection
+    // Identitety Filters
     connect(callsignLine, &QLineEdit::textChanged, this, &MainWindow::callsignChanged);
     connect(callsignLine, &QLineEdit::returnPressed, this, &MainWindow::callsignReturnPressed);
     connect(callsignSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::callsignSelectionPressed);
@@ -303,7 +318,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     connect(trackIdLine, &QLineEdit::returnPressed, this, &MainWindow::trackIdReturnPressed);
     connect(trackIdSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::trackIdSelectionPressed);
 
-    // Strategic Menus
+    // Strategic Classification & Affiliation
     connect(affiliationMenu, &QMenu::triggered, this, &MainWindow::affiliationActionClicked);
     connect(domainMenu, &QMenu::triggered, this, &MainWindow::domainActionClicked);
     connect(domainButtonSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::domainSelectionPressed);
@@ -316,21 +331,20 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     connect(protectionSelectionMinPressed_Btn, &QPushButton::clicked, this, &MainWindow::protectionSelectionMinPressed);
     connect(protectionSelectionMaxPressed_Btn, &QPushButton::clicked, this, &MainWindow::protectionSelectionMaxPressed);
 
-    // Range Sliders & Inputs
+    // Telemetry Ranges & Inputs
     connect(fuelSlider, &RangeSlider::valuesChanged, this, &MainWindow::fuelSliderChanged);
     connect(fuelInputMin, &QLineEdit::textChanged, this, &MainWindow::fuelInputMinChanged);
     connect(fuelInputMax, &QLineEdit::textChanged, this, &MainWindow::fuelInputMaxChanged);
     connect(distanceSlider, &RangeSlider::valuesChanged, this, &MainWindow::distanceSliderChanged);
     connect(distanceInputMin, &QLineEdit::textChanged, this, &MainWindow::distanceInputMinChanged);
     connect(distanceInputMax, &QLineEdit::textChanged, this, &MainWindow::distanceInputMaxChanged);
-    connect(targetXLine, &QLineEdit::textChanged, this, &MainWindow::filterFunction);
-    connect(targetYLine, &QLineEdit::textChanged, this, &MainWindow::filterFunction);
+    connect(targetXLine, &QLineEdit::textChanged, this, &MainWindow::updateDisplayButtonPreview);
+    connect(targetYLine, &QLineEdit::textChanged, this, &MainWindow::updateDisplayButtonPreview);
 
     // Filter Clearing
     connect(clearButton, &QPushButton::clicked, this, &MainWindow::filtersCleared);
 
-    // Sorting & Application Actions
-    connect(displayButton, &QPushButton::clicked, this, &MainWindow::displayButtonClicked);
+    // Sorting Actions
     connect(actionDistAsc, &QAction::triggered, this, &MainWindow::sortByDistanceAsc);
     connect(actionDistDesc, &QAction::triggered, this, &MainWindow::sortByDistanceDesc);
     connect(actionFuelAsc, &QAction::triggered, this, &MainWindow::sortByFuelAsc);
@@ -339,9 +353,13 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     connect(actionPriorityDesc, &QAction::triggered, this, &MainWindow::sortByPriorityDesc);
     connect(actionClassAsc, &QAction::triggered, this, &MainWindow::sortByClassificationAsc);
     connect(actionClassDesc, &QAction::triggered, this, &MainWindow::sortByClassificationDesc);
+
+    // Application Actions
+    connect(displayButton, &QPushButton::clicked, this, &MainWindow::displayButtonClicked);
     connect(exitButton, &QPushButton::clicked, qApp, &QApplication::quit);
 
-    // Listwidget dialog
+
+    // List Widget Dialog
     connect(resultsList, &QListWidget::itemDoubleClicked, this, &MainWindow::listItemDoubleclicked);
 
     // --- AUTO-COMPLETE & DYNAMIC UPDATES ---
@@ -372,7 +390,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
 
 // --- Filtering Logic ---
 // Resolves UI state into filter criteria and delegates evaluation to the controller.
-void MainWindow::filterFunction() {
+FilterCriteria MainWindow::filterFunction() const {
     FilterCriteria criteria;
 
     // --- Capability Flags ---
@@ -413,19 +431,7 @@ void MainWindow::filterFunction() {
     // --- Affiliation ---
     criteria.affiliation = activeAffiliation;
 
-    controller->applyFilter(criteria);
-
-    if (!controller->isFilterActive()) {
-        displayButton->setText(
-            "DISPLAY RESULTS (" +
-            QString::number(tacticalVehicleDb->vehicles().size()) + ")"
-            );
-    } else {
-        displayButton->setText(
-            "DISPLAY RESULTS (" +
-            QString::number(controller->filteredVehicles.size()) + ")"
-            );
-    }
+    return criteria;
 }
 
 void MainWindow::filtersCleared() {
@@ -503,7 +509,7 @@ void MainWindow::filtersCleared() {
     affiliationButton->setText("All Types");
     activeAffiliation = "All Types";
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 // --- UI Input Logic ---
@@ -531,7 +537,7 @@ void MainWindow::callsignChanged(const QString &callsignText) {
         callsignSelectionPressed_Btn->setVisible(false);
     }
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::callsignReturnPressed() {
@@ -548,7 +554,7 @@ void MainWindow::callsignSelectionPressed() {
     callsignSelectionPressed_Btn->setVisible(false);
     callsignLine->setText("");
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::trackIdChanged(const QString &trackIdText) {
@@ -574,7 +580,7 @@ void MainWindow::trackIdChanged(const QString &trackIdText) {
         trackIdSelectionPressed_Btn->setVisible(false);
     }
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::trackIdReturnPressed() {
@@ -591,13 +597,14 @@ void MainWindow::trackIdSelectionPressed() {
     trackIdSelectionPressed_Btn->setVisible(false);
     trackIdLine->setText("");
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::affiliationActionClicked(QAction* action) {
     activeAffiliation = action->text();
     affiliationButton->setText(activeAffiliation);
-    filterFunction();
+
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::domainActionClicked(QAction* action) {
@@ -612,7 +619,7 @@ void MainWindow::domainActionClicked(QAction* action) {
 
     domainButton->setText(activeDomain);
 
-    filterFunction();
+   updateDisplayButtonPreview();
 }
 
 void MainWindow::domainSelectionPressed() {
@@ -623,7 +630,7 @@ void MainWindow::domainSelectionPressed() {
     domainButtonSelectionPressed_Btn->setText("");
     domainButton->setText("Select Domain");
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::propulsionActionClicked(QAction* action) {
@@ -638,7 +645,7 @@ void MainWindow::propulsionActionClicked(QAction* action) {
 
     propulsionButton->setText(activePropulsion);
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::propulsionSelectionPressed() {
@@ -649,7 +656,7 @@ void MainWindow::propulsionSelectionPressed() {
     propulsionSelectionPressed_Btn->setText("");
     propulsionButton->setText("Select Type");
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::priorityActionClicked(QAction* action) {
@@ -664,7 +671,7 @@ void MainWindow::priorityActionClicked(QAction* action) {
 
     priorityButton->setText(activePriority);
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::prioritySelectionPressed() {
@@ -675,7 +682,7 @@ void MainWindow::prioritySelectionPressed() {
     prioritySelectionPressed_Btn->setText("");
     priorityButton->setText("Set Priority");
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::protectionMenuMinClicked(QAction* action) {
@@ -705,7 +712,7 @@ void MainWindow::protectionMenuMinClicked(QAction* action) {
         }
     }
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::protectionMenuMaxClicked(QAction* action) {
@@ -720,7 +727,7 @@ void MainWindow::protectionMenuMaxClicked(QAction* action) {
 
     protectionButtonMax->setText(action->text());
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::protectionSelectionMinPressed() {
@@ -735,7 +742,7 @@ void MainWindow::protectionSelectionMinPressed() {
         action->setVisible(true);
     }
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::protectionSelectionMaxPressed() {
@@ -746,7 +753,7 @@ void MainWindow::protectionSelectionMaxPressed() {
     protectionSelectionMaxPressed_Btn->setText("");
     protectionButtonMax->setText("Max Level");
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::distanceSliderChanged(int x, int y) {
@@ -765,7 +772,7 @@ void MainWindow::distanceSliderChanged(int x, int y) {
     distanceInputMin->blockSignals(false);
     distanceInputMax->blockSignals(false);
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::distanceInputMinChanged(const QString &distanceString) {
@@ -782,7 +789,7 @@ void MainWindow::distanceInputMinChanged(const QString &distanceString) {
     }
     distanceSlider->blockSignals(false);
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::distanceInputMaxChanged(const QString &distanceString) {
@@ -809,7 +816,7 @@ void MainWindow::distanceInputMaxChanged(const QString &distanceString) {
     }
     distanceSlider->blockSignals(false);
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::fuelSliderChanged(int x, int y) {
@@ -828,7 +835,7 @@ void MainWindow::fuelSliderChanged(int x, int y) {
     fuelInputMin->blockSignals(false);
     fuelInputMax->blockSignals(false);
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::fuelInputMinChanged(const QString &fuelString) {
@@ -845,7 +852,7 @@ void MainWindow::fuelInputMinChanged(const QString &fuelString) {
     }
     fuelSlider->blockSignals(false);
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 void MainWindow::fuelInputMaxChanged(const QString &fuelString) {
@@ -862,7 +869,7 @@ void MainWindow::fuelInputMaxChanged(const QString &fuelString) {
     }
     fuelSlider->blockSignals(false);
 
-    filterFunction();
+    updateDisplayButtonPreview();
 }
 
 // --- Simulation Logic ---
@@ -1055,10 +1062,24 @@ void MainWindow::sortByDistanceDesc() {
 // Displays results and applies default distance-based ordering.
 void MainWindow::displayButtonClicked() {
     manualUpdateRequested = true;
-    filterFunction();
+    FilterCriteria criteria = filterFunction();
+    controller->applyFilter(criteria);
     printList();
     sortByDistanceAsc();
     manualUpdateRequested = false;
+}
+
+void MainWindow::updateDisplayButtonPreview() {
+    FilterCriteria criteria = filterFunction();
+
+    const int total = tacticalVehicleDb->vehicles().size();
+    const int matches = controller->countMatches(criteria);
+
+    displayButton->setText(
+        QString("DISPLAY RESULTS (%1 / %2)")
+            .arg(matches)
+            .arg(total)
+        );
 }
 
 void MainWindow::printList() {

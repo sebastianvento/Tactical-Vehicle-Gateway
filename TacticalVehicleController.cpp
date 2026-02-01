@@ -22,107 +22,54 @@ TacticalVehicleController::TacticalVehicleController(TacticalVehicleData& data) 
 void TacticalVehicleController::applyFilter(const FilterCriteria& criteria) {
     filteredVehicles.clear();
 
-    for (const auto& vehicle : data.vehicles()) {
-
-        // Default to permissive matching; constraints narrow results
-        bool capabilityMatch     = true;
-        bool callsignMatch       = true;
-        bool trackIdMatch        = true;
-        bool domainMatch         = true;
-        bool propulsionMatch     = true;
-        bool priorityMatch       = true;
-        bool protectionMatchMin  = true;
-        bool protectionMatchMax  = true;
-        bool fuelMatchMin        = true;
-        bool fuelMatchMax        = true;
-        bool distanceMatchMin    = true;
-        bool distanceMatchMax    = true;
-        bool affiliationMatch    = true;
-
-        // --- Capability Flags ---
-        if (criteria.hasSatCom && !vehicle.hasSatCom) {
-            capabilityMatch = false;
-        }
-        if (criteria.isAmphibious && !vehicle.isAmphibious) {
-            capabilityMatch = false;
-        }
-        if (criteria.isUnmanned && !vehicle.isUnmanned) {
-            capabilityMatch = false;
-        }
-        if (criteria.hasActiveDefense && !vehicle.hasActiveDefense) {
-            capabilityMatch = false;
-        }
-
-        // --- Identity Filters ---
-        if (criteria.callsignActive && vehicle.callsign != criteria.callsign) {
-            callsignMatch = false;
-        }
-
-        if (criteria.trackIdActive && vehicle.trackId != criteria.trackId) {
-            trackIdMatch = false;
-        }
-
-        // --- Strategic Classification ---
-        if (criteria.domainActive && vehicle.domain != criteria.domain) {
-            domainMatch = false;
-        }
-
-        if (criteria.propulsionActive && vehicle.propulsion != criteria.propulsion) {
-            propulsionMatch = false;
-        }
-
-        if (criteria.priorityActive && vehicle.priority != criteria.priority) {
-            priorityMatch = false;
-        }
-
-        // --- Protection Constraints ---
-        if (criteria.protectionMinActive && vehicle.protectionLevel < criteria.protectionMin) {
-            protectionMatchMin = false;
-        }
-
-        if (criteria.protectionMaxActive && vehicle.protectionLevel > criteria.protectionMax) {
-            protectionMatchMax = false;
-        }
-
-        // --- Telemetry Ranges ---
-        if (vehicle.fuelLevel < criteria.fuelMin) {
-            fuelMatchMin = false;
-        }
-        if (vehicle.fuelLevel > criteria.fuelMax) {
-            fuelMatchMax = false;
-        }
-
-        if (vehicle.distanceToTarget < criteria.distanceMin) {
-            distanceMatchMin = false;
-        }
-        if (criteria.distanceMax < 10000 && vehicle.distanceToTarget > criteria.distanceMax) {
-            distanceMatchMax = false;
-        }
-
-        // --- Affiliation ---
-        if (criteria.affiliation != "All Types" &&
-            vehicle.affiliation != criteria.affiliation) {
-            affiliationMatch = false;
-        }
-
-        // --- FINAL EVALUATION ---
-        if (capabilityMatch &&
-            callsignMatch &&
-            trackIdMatch &&
-            domainMatch &&
-            propulsionMatch &&
-            priorityMatch &&
-            protectionMatchMin &&
-            protectionMatchMax &&
-            fuelMatchMin &&
-            fuelMatchMax &&
-            distanceMatchMin &&
-            distanceMatchMax &&
-            affiliationMatch) {
-
-            filteredVehicles.push_back(&vehicle);
+    for (const auto& v : data.vehicles()) {
+        if (matches(v, criteria)) {
+            filteredVehicles.push_back(&v);
         }
     }
+}
+
+bool TacticalVehicleController::matches( const TacticalVehicle& vehicle, const FilterCriteria& criteria) const {
+    // --- Capability Flags ---
+    if (criteria.hasSatCom && !vehicle.hasSatCom) return false;
+    if (criteria.isAmphibious && !vehicle.isAmphibious) return false;
+    if (criteria.isUnmanned && !vehicle.isUnmanned) return false;
+    if (criteria.hasActiveDefense && !vehicle.hasActiveDefense) return false;
+
+    // --- Identity ---
+    if (criteria.callsignActive && vehicle.callsign != criteria.callsign) return false;
+    if (criteria.trackIdActive && vehicle.trackId != criteria.trackId) return false;
+
+    // --- Classification ---
+    if (criteria.domainActive && vehicle.domain != criteria.domain) return false;
+    if (criteria.propulsionActive && vehicle.propulsion != criteria.propulsion) return false;
+    if (criteria.priorityActive && vehicle.priority != criteria.priority) return false;
+
+    // --- Protection ---
+    if (criteria.protectionMinActive && vehicle.protectionLevel < criteria.protectionMin) return false;
+    if (criteria.protectionMaxActive && vehicle.protectionLevel > criteria.protectionMax) return false;
+
+    // --- Telemetry ---
+    if (vehicle.fuelLevel < criteria.fuelMin) return false;
+    if (vehicle.fuelLevel > criteria.fuelMax) return false;
+    if (vehicle.distanceToTarget < criteria.distanceMin) return false;
+    if (criteria.distanceMax < 10000 && vehicle.distanceToTarget > criteria.distanceMax) return false;
+
+    // --- Affiliation ---
+    if (criteria.affiliation != "All Types" &&
+        vehicle.affiliation != criteria.affiliation) return false;
+
+    return true;
+}
+
+int TacticalVehicleController::countMatches(const FilterCriteria& criteria) const {
+    int count = 0;
+    for (const auto& v : data.vehicles()) {
+        if (matches(v, criteria)) {
+            ++count;
+        }
+    }
+    return count;
 }
 
 /**

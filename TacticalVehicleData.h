@@ -34,20 +34,20 @@ public:
     // Stateless comparators intended for std::sort on pointer-based views.
 
     // Distance-based
-    static bool sortByDistanceAsc(const TacticalVehicle* a, const TacticalVehicle* b);
-    static bool sortByDistanceDesc(const TacticalVehicle* a, const TacticalVehicle* b);
+    static bool sortByDistanceAsc(const TacticalVehicle *a, const TacticalVehicle *b);
+    static bool sortByDistanceDesc(const TacticalVehicle *a, const TacticalVehicle *b);
 
     // Fuel-based
-    static bool sortByFuelAsc(const TacticalVehicle* a, const TacticalVehicle* b);
-    static bool sortByFuelDesc(const TacticalVehicle* a, const TacticalVehicle* b);
+    static bool sortByFuelAsc(const TacticalVehicle *a, const TacticalVehicle *b);
+    static bool sortByFuelDesc(const TacticalVehicle *a, const TacticalVehicle *b);
 
     // Priority-based
-    static bool sortByPriorityAsc(const TacticalVehicle* a, const TacticalVehicle* b);
-    static bool sortByPriorityDesc(const TacticalVehicle* a, const TacticalVehicle* b);
+    static bool sortByPriorityAsc(const TacticalVehicle *a, const TacticalVehicle *b);
+    static bool sortByPriorityDesc(const TacticalVehicle *a, const TacticalVehicle *b);
 
     // Classification-based
-    static bool sortByClassificationAsc(const TacticalVehicle* a, const TacticalVehicle* b);
-    static bool sortByClassificationDesc(const TacticalVehicle* a, const TacticalVehicle* b);
+    static bool sortByClassificationAsc(const TacticalVehicle *a, const TacticalVehicle *b);
+    static bool sortByClassificationDesc(const TacticalVehicle *a, const TacticalVehicle *b);
 
 private:
     // --- Data Storage ---

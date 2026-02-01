@@ -5,7 +5,7 @@
 
 #include <QWidget>
 
-// Forward declarations (compile-time optimization)
+// Forward declarations
 class QAction;
 class QCheckBox;
 class QCompleter;
@@ -38,10 +38,11 @@ public:
 private slots:
     // --- Core Logic ---
     void displayButtonClicked();                       ///< Explicit trigger to refresh displayed results
-    void filterFunction();                             ///< Resolves UI state into filter criteria
+    FilterCriteria filterFunction() const;             ///< Resolves UI state into filter criteria
     void filtersCleared();
     void printList();                                  ///< Populates resultsList from current data view
-    void listItemDoubleclicked(QListWidgetItem *item); ///< Shows dialog with entity info when QListWidget item clicked.
+    void updateDisplayButtonPreview();                 ///< Updates filtered vehicles preview count
+    void listItemDoubleclicked(QListWidgetItem *item); ///< Shows dialog with entity info when QListWidget item clicked
 
     // --- Identity & Search Management ---
     void callsignChanged(const QString& text);
@@ -181,6 +182,7 @@ private:
 
     // --- Command & Feedback Controls ---
     QPushButton *displayButton;
+    QPushButton *exitButton;
     QPushButton *sortButton;
     QPushButton *clearButton;
     QCheckBox *liveUpdatesBox;
@@ -205,6 +207,7 @@ private:
 
     // --- Timing & Helpers ---
     QTimer *simTimer;
+
 };
 
 #endif // MAINWINDOW_H
