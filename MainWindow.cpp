@@ -118,9 +118,9 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     domainMenu->addAction("Electronic");
     domainButton->setMenu(domainMenu);
     stratGrid->addWidget(domainButton, 0, 1);
-    stratGrid->addWidget(domainButtonSelectionPressed_Btn = new QPushButton(), 0, 2);
-    domainButtonSelectionPressed_Btn->setIcon(choiceDeletion);
-    domainButtonSelectionPressed_Btn->setVisible(false);
+    stratGrid->addWidget(domainSelectionPressed_Btn = new QPushButton(), 0, 2);
+    domainSelectionPressed_Btn->setIcon(choiceDeletion);
+    domainSelectionPressed_Btn->setVisible(false);
 
     stratGrid->addWidget(new QLabel("Propulsion Type:"), 1, 0);
     propulsionButton = new QPushButton("Select Type");
@@ -321,7 +321,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     // Strategic Classification & Affiliation
     connect(affiliationMenu, &QMenu::triggered, this, &MainWindow::affiliationActionClicked);
     connect(domainMenu, &QMenu::triggered, this, &MainWindow::domainActionClicked);
-    connect(domainButtonSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::domainSelectionPressed);
+    connect(domainSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::domainSelectionPressed);
     connect(propulsionMenu, &QMenu::triggered, this, &MainWindow::propulsionActionClicked);
     connect(propulsionSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::propulsionSelectionPressed);
     connect(priorityMenu, &QMenu::triggered, this, &MainWindow::priorityActionClicked);
@@ -465,8 +465,8 @@ void MainWindow::filtersCleared() {
     priorityFilterActive = false;
     activePriority.clear();
 
-    domainButtonSelectionPressed_Btn->setVisible(false);
-    domainButtonSelectionPressed_Btn->setText("");
+    domainSelectionPressed_Btn->setVisible(false);
+    domainSelectionPressed_Btn->setText("");
     domainButton->setText("Select Domain");
 
     propulsionSelectionPressed_Btn->setVisible(false);
@@ -610,10 +610,10 @@ void MainWindow::domainActionClicked(QAction* action) {
     domainFilterActive = true;
     activeDomain = action->text();
 
-    domainButtonSelectionPressed_Btn->setVisible(true);
-    if (domainButtonSelectionPressed_Btn->text() != activeDomain) {
-        domainButtonSelectionPressed_Btn->setText(activeDomain);
-        domainButtonSelectionPressed_Btn->adjustSize();
+    domainSelectionPressed_Btn->setVisible(true);
+    if (domainSelectionPressed_Btn->text() != activeDomain) {
+        domainSelectionPressed_Btn->setText(activeDomain);
+        domainSelectionPressed_Btn->adjustSize();
     }
 
     domainButton->setText(activeDomain);
@@ -625,8 +625,8 @@ void MainWindow::domainSelectionPressed() {
     domainFilterActive = false;
     activeDomain.clear();
 
-    domainButtonSelectionPressed_Btn->setVisible(false);
-    domainButtonSelectionPressed_Btn->setText("");
+    domainSelectionPressed_Btn->setVisible(false);
+    domainSelectionPressed_Btn->setText("");
     domainButton->setText("Select Domain");
 
     updateDisplayButtonPreview();
@@ -798,15 +798,13 @@ void MainWindow::distanceInputMaxChanged(const QString &distanceString) {
     if (distanceString.isEmpty()) {
         distanceSlider->setValues(distanceSlider->lowerValue(), 10000);
         distanceInputMax->setPlaceholderText("MAX (No Limit)");
-    }
-    else if (distanceString == "MAX (No Limit)" || distanceString.toInt() >= 10000) {
+    } else if (distanceString == "MAX (No Limit)" || distanceString.toInt() >= 10000) {
         distanceSlider->setValues(distanceSlider->lowerValue(), 10000);
 
         distanceInputMax->blockSignals(true);
         distanceInputMax->setText("MAX (No Limit)");
         distanceInputMax->blockSignals(false);
-    }
-    else {
+    } else {
         bool ok;
         int val = distanceString.toInt(&ok);
         if (ok) {
@@ -901,7 +899,6 @@ void MainWindow::sortByFuelAsc() {
     manualUpdateRequested = true;
 
     if (resultsList->count() > 0) {
-
         auto& fv = controller->filteredVehicles;
         auto& av = tacticalVehicleDb->vehiclesMutable();
 
@@ -940,7 +937,6 @@ void MainWindow::sortByPriorityAsc() {
     manualUpdateRequested = true;
 
     if (resultsList->count() > 0) {
-
         auto& fv = controller->filteredVehicles;
         auto& av = tacticalVehicleDb->vehiclesMutable();
 
@@ -960,7 +956,6 @@ void MainWindow::sortByPriorityDesc() {
     manualUpdateRequested = true;
 
     if (resultsList->count() > 0) {
-
         auto& fv = controller->filteredVehicles;
         auto& av = tacticalVehicleDb->vehiclesMutable();
 
@@ -980,7 +975,6 @@ void MainWindow::sortByClassificationAsc() {
     manualUpdateRequested = true;
 
     if (resultsList->count() > 0) {
-
         auto& fv = controller->filteredVehicles;
         auto& av = tacticalVehicleDb->vehiclesMutable();
 
@@ -1000,7 +994,6 @@ void MainWindow::sortByClassificationDesc() {
     manualUpdateRequested = true;
 
     if (resultsList->count() > 0) {
-
         auto& fv = controller->filteredVehicles;
         auto& av = tacticalVehicleDb->vehiclesMutable();
 
@@ -1020,7 +1013,6 @@ void MainWindow::sortByDistanceAsc() {
     manualUpdateRequested = true;
 
     if (resultsList->count() > 0) {
-
         auto& fv = controller->filteredVehicles;
         auto& av = tacticalVehicleDb->vehiclesMutable();
 
@@ -1040,7 +1032,6 @@ void MainWindow::sortByDistanceDesc() {
     manualUpdateRequested = true;
 
     if (resultsList->count() > 0) {
-
         auto& fv = controller->filteredVehicles;
         auto& av = tacticalVehicleDb->vehiclesMutable();
 
@@ -1188,32 +1179,28 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
             QString dUnm;
             if (vehicle.isUnmanned) {
                 dUnm = "Yes";
-            }
-            else {
+            } else {
                 dUnm = "No";
             }
             dUnm =           ("Unmanned:           " + dUnm);
             QString dSat;
             if (vehicle.hasSatCom) {
                 dSat = "Yes";
-            }
-            else {
+            } else {
                 dSat = "No";
             }
             dSat =           ("Has SatCom:         " + dSat);
             QString dAct;
             if (vehicle.hasActiveDefense) {
                 dAct = "Yes";
-            }
-            else {
+            } else {
                 dAct = "No";
             }
             dAct =           ("Has Active Defence: " + dAct);
             QString dAmp;
             if (vehicle.isAmphibious) {
                 dAmp = "Yes";
-            }
-            else {
+            }else {
                 dAmp = "No";
             }
 

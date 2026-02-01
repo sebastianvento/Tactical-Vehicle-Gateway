@@ -86,7 +86,7 @@ public:
 
 private:
     // --- Data Reference ---
-    TacticalVehicleData& data; ///< Authoritative vehicle data store
+    TacticalVehicleData& data; ///< Vehicle data store
 };
 
 #endif // TACTICALVEHICLECONTROLLER_H

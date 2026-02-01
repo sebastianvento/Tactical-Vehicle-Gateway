@@ -37,8 +37,8 @@ public:
 
 private slots:
     // --- Core Logic ---
-    void displayButtonClicked();                       ///< Explicit trigger to refresh displayed results
-    FilterCriteria filterFunction() const;             ///< Resolves UI state into filter criteria
+    void displayButtonClicked();                       ///< Explicit trigger to apply filters and refresh displayed results
+    FilterCriteria filterFunction() const;             ///< Resolves UI state and UI conventions into filter criteria
     void filtersCleared();
     void printList();                                  ///< Populates resultsList from current data view
     void updateDisplayButtonPreview();                 ///< Updates filtered vehicles preview count
@@ -93,7 +93,7 @@ private slots:
     void sortByPriorityDesc();
 
     // --- Simulation & Background Tasks ---
-    void onSimulationTick();        ///< Periodic update for dynamic asset data
+    void onSimulationTick(); ///< Periodic update for dynamic asset data
 
 private:
     // --- Sort Modes ---
@@ -118,7 +118,7 @@ private:
     QStringList trackIdList;
     QStringList callsignList;
 
-    bool manualUpdateRequested = false; ///< Guards explicit list rendering phases
+    bool manualUpdateRequested = false; ///< Guards explicit list rendering and update phases
 
     bool callsignFilterActive = false;
     bool trackIdFilterActive = false;
@@ -191,7 +191,7 @@ private:
 
     // --- Selection / Tag Indicators ---
     QPushButton *callsignSelectionPressed_Btn;
-    QPushButton *domainButtonSelectionPressed_Btn;
+    QPushButton *domainSelectionPressed_Btn;
     QPushButton *prioritySelectionPressed_Btn;
     QPushButton *propulsionSelectionPressed_Btn;
     QPushButton *protectionSelectionMaxPressed_Btn;

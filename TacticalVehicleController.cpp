@@ -97,7 +97,7 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
 
         const double rad = (v.heading - 90.0) * (PI_CONST / 180.0);
 
-        // Apply small randomized variation to speed
+        // Apply small randomized variation based on target speed
         quint32 variedSpeed = 0;
         double upper = 0.0;
         double lower = 0.0;
