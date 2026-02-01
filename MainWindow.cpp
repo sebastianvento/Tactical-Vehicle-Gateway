@@ -310,7 +310,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     connect(cbIsUnmanned, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
     connect(cbHasActiveDefense, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
 
-    // Identitety Filters
+    // Identity Filters
     connect(callsignLine, &QLineEdit::textChanged, this, &MainWindow::callsignChanged);
     connect(callsignLine, &QLineEdit::returnPressed, this, &MainWindow::callsignReturnPressed);
     connect(callsignSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::callsignSelectionPressed);
@@ -358,7 +358,6 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     connect(displayButton, &QPushButton::clicked, this, &MainWindow::displayButtonClicked);
     connect(exitButton, &QPushButton::clicked, qApp, &QApplication::quit);
 
-
     // List Widget Dialog
     connect(resultsList, &QListWidget::itemDoubleClicked, this, &MainWindow::listItemDoubleclicked);
 
@@ -393,19 +392,19 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
 FilterCriteria MainWindow::filterFunction() const {
     FilterCriteria criteria;
 
-    // --- Capability Flags ---
+    // Capability Flags
     criteria.hasSatCom = cbHasSatCom->isChecked();
     criteria.isAmphibious = cbIsAmphibious->isChecked();
     criteria.isUnmanned = cbIsUnmanned->isChecked();
     criteria.hasActiveDefense = cbHasActiveDefense->isChecked();
 
-    // --- Identity Filters ---
+    // Identity Filters
     criteria.callsignActive = callsignFilterActive;
     criteria.callsign = activeCallsign;
     criteria.trackIdActive = trackIdFilterActive;
     criteria.trackId = activeTrackId;
 
-    // --- Strategic Classification ---
+    // Strategic Classification
     criteria.domainActive = domainFilterActive;
     criteria.domain = activeDomain;
 
@@ -415,33 +414,33 @@ FilterCriteria MainWindow::filterFunction() const {
     criteria.priorityActive = priorityFilterActive;
     criteria.priority = activePriority;
 
-    // --- Protection Constraints ---
+    // Protection Constraints
     criteria.protectionMinActive = protectionMinFilterActive;
     criteria.protectionMin = activeProtectionMin;
 
     criteria.protectionMaxActive = protectionMaxFilterActive;
     criteria.protectionMax = activeProtectionMax;
 
-    // --- Telemetry Ranges ---
+    // Telemetry Ranges
     criteria.fuelMin = fuelSlider->lowerValue();
     criteria.fuelMax = fuelSlider->upperValue();
     criteria.distanceMin = distanceSlider->lowerValue();
     criteria.distanceMax = distanceSlider->upperValue();
 
-    // --- Affiliation ---
+    // Affiliation
     criteria.affiliation = activeAffiliation;
 
     return criteria;
 }
 
 void MainWindow::filtersCleared() {
-    // --- Capability Flags ---
+    // Capability Flags
     cbHasSatCom->setCheckState(Qt::Unchecked);
     cbIsAmphibious->setCheckState(Qt::Unchecked);
     cbIsUnmanned->setCheckState(Qt::Unchecked);
     cbHasActiveDefense->setCheckState(Qt::Unchecked);
 
-    // --- Identity Filters ---
+    // Identity Filters
     callsignFilterActive = false;
     activeCallsign.clear();
 
@@ -456,7 +455,7 @@ void MainWindow::filtersCleared() {
     trackIdSelectionPressed_Btn->setText("");
     trackIdLine->setText("");
 
-    // --- Strategic Classification ---
+    // Strategic Classification
     domainFilterActive = false;
     activeDomain.clear();
 
@@ -478,7 +477,7 @@ void MainWindow::filtersCleared() {
     prioritySelectionPressed_Btn->setText("");
     priorityButton->setText("Set Priority");
 
-    // --- Protection Constraints ---
+    // Protection Constraints
     protectionMinFilterActive = false;
     activeProtectionMin = 0;
 
@@ -497,7 +496,7 @@ void MainWindow::filtersCleared() {
         action->setVisible(true);
     }
 
-    // --- Telemetry Ranges ---
+    // Telemetry Ranges
     fuelInputMin->setText("0");
     fuelInputMax->setText("100");
     fuelSlider->setValues(0, 100);
@@ -505,7 +504,7 @@ void MainWindow::filtersCleared() {
     distanceInputMax->setText("MAX (No Limit)");
     distanceSlider->setValues(0, 10000);
 
-    // --- Affiliation ---
+    // Affiliation
     affiliationButton->setText("All Types");
     activeAffiliation = "All Types";
 
@@ -896,7 +895,7 @@ void MainWindow::onSimulationTick() {
 }
 
 // --- Sorting Logic ---
-// UI-driven handlers for ordering asset views by operational metrics.
+// UI-driven handlers for ordering asset views.
 void MainWindow::sortByFuelAsc() {
     currentSortMode = SortMode::FuelAsc;
     manualUpdateRequested = true;
@@ -1057,7 +1056,7 @@ void MainWindow::sortByDistanceDesc() {
 }
 
 // --- Display Logic  ---
-// Functions responsible for rendering data to the user interface.
+// Functions responsible for displaying data to the user interface.
 
 // Displays results and applies default distance-based ordering.
 void MainWindow::displayButtonClicked() {

@@ -13,12 +13,7 @@ TacticalVehicleController::TacticalVehicleController(TacticalVehicleData& data) 
 }
 
 // --- Filtering Logic ---
-// Core engine for evaluating tactical vehicle data against
-// UI-provided filter criteria.
-
-// This function is intentionally UI-agnostic: all visual state
-// (visibility, selections, ranges) is resolved by MainWindow
-// before being passed here as primitive values.
+// Evaluates TacticalVehicleData against resolved, UI-agnostic filter criteria.
 void TacticalVehicleController::applyFilter(const FilterCriteria& criteria) {
     filteredVehicles.clear();
 
@@ -30,32 +25,32 @@ void TacticalVehicleController::applyFilter(const FilterCriteria& criteria) {
 }
 
 bool TacticalVehicleController::matches( const TacticalVehicle& vehicle, const FilterCriteria& criteria) const {
-    // --- Capability Flags ---
+    // Capability Flags
     if (criteria.hasSatCom && !vehicle.hasSatCom) return false;
     if (criteria.isAmphibious && !vehicle.isAmphibious) return false;
     if (criteria.isUnmanned && !vehicle.isUnmanned) return false;
     if (criteria.hasActiveDefense && !vehicle.hasActiveDefense) return false;
 
-    // --- Identity ---
+    // Identity Filters
     if (criteria.callsignActive && vehicle.callsign != criteria.callsign) return false;
     if (criteria.trackIdActive && vehicle.trackId != criteria.trackId) return false;
 
-    // --- Classification ---
+    // Strategic Classification
     if (criteria.domainActive && vehicle.domain != criteria.domain) return false;
     if (criteria.propulsionActive && vehicle.propulsion != criteria.propulsion) return false;
     if (criteria.priorityActive && vehicle.priority != criteria.priority) return false;
 
-    // --- Protection ---
+    // Protection Constraints
     if (criteria.protectionMinActive && vehicle.protectionLevel < criteria.protectionMin) return false;
     if (criteria.protectionMaxActive && vehicle.protectionLevel > criteria.protectionMax) return false;
 
-    // --- Telemetry ---
+    // Telemetry Ranges
     if (vehicle.fuelLevel < criteria.fuelMin) return false;
     if (vehicle.fuelLevel > criteria.fuelMax) return false;
     if (vehicle.distanceToTarget < criteria.distanceMin) return false;
     if (criteria.distanceMax < 10000 && vehicle.distanceToTarget > criteria.distanceMax) return false;
 
-    // --- Affiliation ---
+    // Affiliation
     if (criteria.affiliation != "All Types" &&
         vehicle.affiliation != criteria.affiliation) return false;
 
@@ -91,8 +86,7 @@ bool TacticalVehicleController::isFilterActive() const {
 }
 
 // --- Simulation Logic ---
-// Advances vehicle positions and recalculates distances
-// relative to the current mission target.
+// Advances vehicle positions and recalculates distances relative to the current mission target.
 
 // This function operates exclusively on model data and is
 // triggered externally by a timed heartbeat (QTimer).
@@ -101,10 +95,9 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
 
     for (auto& v : data.vehiclesMutable()) {
 
-        // Convert heading to radians (UI uses degrees)
         const double rad = (v.heading - 90.0) * (PI_CONST / 180.0);
 
-        // Variating speed realistically
+        // Apply small randomized variation to speed
         quint32 variedSpeed = 0;
         double upper = 0.0;
         double lower = 0.0;
@@ -124,7 +117,7 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
             variedSpeed = QRandomGenerator::global()->bounded(lowerLimit, upperLimit);
             v.speed = static_cast<double>(variedSpeed);
 
-        // Variating heading realistically
+        // Apply small randomized variation to heading
         quint32 variedHeading = 0;
         if (v.heading > 0) {
             double headup = v.heading+1.0;

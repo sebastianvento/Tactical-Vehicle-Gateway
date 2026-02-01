@@ -6,17 +6,17 @@
 #include <QFile>
 #include <QDebug>
 
-// --- TacticalVehicleData Implementation ---
+// --- Tactical Vehicle Data Model ---
 // Owns the persistent tactical dataset and provides JSON ingestion,
 // controlled container access, and stateless sorting predicates.
 
-// --- Lifecycle ---
+// --- Construction ---
 TacticalVehicleData::TacticalVehicleData() {
     // Intentionally minimal.
     // Data ingestion is explicitly triggered via loadVehiclesFromJson().
 }
 
-// --- Data Ingestion & Database Population ---
+// --- Data Ingestion ---
 /**
  * @brief Parses data from a JSON file and initializes internal containers.
  *
@@ -58,7 +58,7 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         QJsonObject obj = value.toObject();
         TacticalVehicle v;
 
-        // --- Static Identity & Classification ---
+        // Identity & Classification
         v.callsign       = obj["callsign"].toString();
         v.trackId        = obj["trackId"].toString();
         v.type           = obj["type"].toString();
@@ -69,13 +69,13 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         v.propulsion     = obj["propulsion"].toString();
         v.natoIcon       = obj["natoIcon"].toString();
 
-        // --- Operational Capabilities ---
+        // Capability Flags
         v.hasSatCom        = obj["hasSatCom"].toBool();
         v.isAmphibious     = obj["isAmphibious"].toBool();
         v.isUnmanned       = obj["isUnmanned"].toBool();
         v.hasActiveDefense = obj["hasActiveDefense"].toBool();
 
-        // --- Technical Specs & Telemetry Baseline ---
+        // Technical Specifications
         v.protectionLevel  = obj["protectionLevel"].toInt();
         v.speed            = obj["speed"].toDouble();
         v.maxSpeed         = obj["maxSpeed"].toDouble();
@@ -116,10 +116,8 @@ std::deque<TacticalVehicle>& TacticalVehicleData::vehiclesMutable() {
     return allVehicles;
 }
 
-// --- Static Sorting Predicates ---
-// Used by std::sort to arrange filtered pointer views and the master container.
-
-// --- Distance Sorting ---
+// --- Sorting Predicates ---
+// Distance Sorting
 bool TacticalVehicleData::sortByDistanceAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->distanceToTarget < b->distanceToTarget;
 }
@@ -128,7 +126,7 @@ bool TacticalVehicleData::sortByDistanceDesc(const TacticalVehicle* a, const Tac
     return a->distanceToTarget > b->distanceToTarget;
 }
 
-// --- Fuel Economy Sorting ---
+// Fuel Level Sorting
 bool TacticalVehicleData::sortByFuelAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->fuelLevel < b->fuelLevel;
 }
@@ -136,7 +134,8 @@ bool TacticalVehicleData::sortByFuelAsc(const TacticalVehicle* a, const Tactical
 bool TacticalVehicleData::sortByFuelDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->fuelLevel > b->fuelLevel;
 }
-// --- Strategic Priority Sorting ---
+
+// Priority Sorting
 bool TacticalVehicleData::sortByPriorityAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->priority < b->priority;
 }
@@ -144,7 +143,8 @@ bool TacticalVehicleData::sortByPriorityAsc(const TacticalVehicle* a, const Tact
 bool TacticalVehicleData::sortByPriorityDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->priority > b->priority;
 }
-// --- Classification Sorting ---
+
+// Classification Sorting
 bool TacticalVehicleData::sortByClassificationAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->classification < b->classification;
 }

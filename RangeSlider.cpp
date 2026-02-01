@@ -3,10 +3,10 @@
 #include <QPainter>
 #include <QMouseEvent>
 
-// --- Rendering & Interaction ---
-// Implements custom painting, mouse interaction, and value-to-pixel mapping
+// --- RangeSlider Implementation ---
+// Implements custom painting, mouse interaction, and coordinate mapping
 
-// --- Lifecycle ---
+// --- Construction ---
 RangeSlider::RangeSlider(QWidget *parent) : QWidget(parent) {
     // Enable mouse tracking to capture movement immediately upon click
     setMouseTracking(true);
@@ -55,21 +55,22 @@ void RangeSlider::paintEvent(QPaintEvent *event) {
     const int xUpper = valueToPosition(m_upperValue);
     const int margin = 15;
 
-    // 1. Draw Background Track
+    // Draw Background Track
     painter.setPen(QPen(Qt::lightGray, 6, Qt::SolidLine, Qt::RoundCap));
     painter.drawLine(margin, yCenter, width() - margin, yCenter);
 
-    // 2. Draw Active Range (Highlight)
+    // Draw Active Range (Highlight)
     painter.setPen(QPen(QColor(0, 120, 215), 6, Qt::SolidLine, Qt::RoundCap));
     painter.drawLine(xLower, yCenter, xUpper, yCenter);
 
-    // 3. Draw Interactive Handles
+    // Draw Interactive Handles
     painter.setPen(QPen(Qt::darkGray, 1));
     painter.setBrush(Qt::white);
     painter.drawEllipse(QPoint(xLower, yCenter), 10, 10);
     painter.drawEllipse(QPoint(xUpper, yCenter), 10, 10);
 }
 
+// --- Mouse Interaction ---
 void RangeSlider::mousePressEvent(QMouseEvent *event) {
     const int mouseX = event->pos().x();
     const int posLower = valueToPosition(m_lowerValue);
@@ -86,7 +87,6 @@ void RangeSlider::mousePressEvent(QMouseEvent *event) {
     }
 }
 
-// --- Mouse Interaction ---
 void RangeSlider::mouseMoveEvent(QMouseEvent *event) {
     const int currentVal = positionToValue(event->pos().x());
 
@@ -110,7 +110,7 @@ void RangeSlider::mouseReleaseEvent(QMouseEvent *event) {
     unsetCursor();
 }
 
-// --- Coordinate Mapping Utilities ---
+// --- Coordinate Mapping ---
 int RangeSlider::valueToPosition(int value) {
     const int margin = 20; // Visual padding for handle radius
 
