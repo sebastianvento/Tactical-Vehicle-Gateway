@@ -8,7 +8,7 @@
 
 // --- Construction ---
 RangeSlider::RangeSlider(QWidget *parent) : QWidget(parent) {
-    // Enable mouse tracking to capture movement immediately upon click
+    // Enable mouse tracking for responsive handle dragging
     setMouseTracking(true);
 
     // Default logical range (0–100)

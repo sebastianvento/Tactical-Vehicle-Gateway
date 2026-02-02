@@ -68,18 +68,10 @@ int TacticalVehicleController::countMatches(const FilterCriteria& criteria) cons
 }
 
 /**
- * @brief Indicates whether filtering currently affects the result set by comparing size.
+ * @brief Indicates whether filtering affects the result set.
  *
- * This function defines "filter active" in an outcome-based sense:
- * it returns true when the filtered view differs from the full vehicle dataset.
- *
- * Note:
- * - This does not represent user filter intent.
- * - If filter criteria are applied but happen to match all vehicles,
- *   this function will return false.
- *
- * This definition is intentional and matches the current UI behavior,
- * where view selection depends on whether filtering narrows results.
+ * Returns true when the filtered view size differs from the full dataset size.
+ * This reflects result-based filtering, not user intent.
  */
 bool TacticalVehicleController::isFilterActive() const {
     return filteredVehicles.size() != data.vehicles().size();
@@ -97,7 +89,7 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
 
         const double rad = (v.heading - 90.0) * (PI_CONST / 180.0);
 
-        // Apply small randomized variation based on target speed
+        // Apply small randomized variation around target speed
         quint32 variedSpeed = 0;
         double upper = 0.0;
         double lower = 0.0;
@@ -118,18 +110,17 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
             v.speed = static_cast<double>(variedSpeed);
 
         // Apply small randomized variation to heading
-        quint32 variedHeading = 0;
-        if (v.heading > 0) {
-            double headup = v.heading+1.0;
-            double headlow = v.heading-1.0;
-            quint32 headingUpper = static_cast<qint32>(headup);
-            quint32 headingLower = static_cast<qint32>(headlow);
-            variedHeading = QRandomGenerator::global()->bounded(headingLower, headingUpper);
-        }
-        else {
-            variedHeading = QRandomGenerator::global()->bounded(0, 1);
-        }
-        v.heading = static_cast<double>(variedHeading);
+            quint32 variedHeading = 0;
+            if (v.heading > 0) {
+                double headup = v.heading+1.0;
+                double headlow = v.heading-1.0;
+                quint32 headingUpper = static_cast<qint32>(headup);
+                quint32 headingLower = static_cast<qint32>(headlow);
+                variedHeading = QRandomGenerator::global()->bounded(headingLower, headingUpper);
+            } else {
+                variedHeading = QRandomGenerator::global()->bounded(0, 1);
+            }
+            v.heading = static_cast<double>(variedHeading);
         }
 
         // Speed conversion: km/h -> m/s

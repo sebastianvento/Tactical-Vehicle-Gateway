@@ -75,7 +75,7 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         v.isUnmanned       = obj["isUnmanned"].toBool();
         v.hasActiveDefense = obj["hasActiveDefense"].toBool();
 
-        // Technical Specifications
+        // Telemetry & Performance Characteristics
         v.protectionLevel  = obj["protectionLevel"].toInt();
         v.speed            = obj["speed"].toDouble();
         v.maxSpeed         = obj["maxSpeed"].toDouble();
@@ -92,7 +92,7 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         allVehicles.push_back(v);
     }
 
-    qDebug() << "Tactical System: Successfully indexed" << allVehicles.size() << "assets.";
+    qDebug() << "Loaded" << allVehicles.size() << "tactical vehicles.";
 }
 
 // --- Container Accessors ---
@@ -117,7 +117,6 @@ std::deque<TacticalVehicle>& TacticalVehicleData::vehiclesMutable() {
 }
 
 // --- Sorting Predicates ---
-// Distance Sorting
 bool TacticalVehicleData::sortByDistanceAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->distanceToTarget < b->distanceToTarget;
 }
@@ -126,7 +125,6 @@ bool TacticalVehicleData::sortByDistanceDesc(const TacticalVehicle* a, const Tac
     return a->distanceToTarget > b->distanceToTarget;
 }
 
-// Fuel Level Sorting
 bool TacticalVehicleData::sortByFuelAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->fuelLevel < b->fuelLevel;
 }
@@ -135,7 +133,6 @@ bool TacticalVehicleData::sortByFuelDesc(const TacticalVehicle* a, const Tactica
     return a->fuelLevel > b->fuelLevel;
 }
 
-// Priority Sorting
 bool TacticalVehicleData::sortByPriorityAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->priority < b->priority;
 }
@@ -144,7 +141,6 @@ bool TacticalVehicleData::sortByPriorityDesc(const TacticalVehicle* a, const Tac
     return a->priority > b->priority;
 }
 
-// Classification Sorting
 bool TacticalVehicleData::sortByClassificationAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->classification < b->classification;
 }

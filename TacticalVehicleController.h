@@ -51,6 +51,7 @@ struct FilterCriteria {
     int fuelMin = 0;
     int fuelMax = 100;
 
+    // --- Distancy To Target ---
     // NOTE: distanceMax == 10000 is treated as "no upper bound" (UI convention).
     int distanceMin = 0;
     int distanceMax = 10000;

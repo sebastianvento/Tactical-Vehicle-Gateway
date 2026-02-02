@@ -53,7 +53,7 @@ private slots:
     void trackIdReturnPressed();
     void trackIdSelectionPressed();
 
-    // --- Strategic Classification Menus ---
+    // --- Strategic Classification & Affiliation Menus ---
     void affiliationActionClicked(QAction* action);
 
     void domainActionClicked(QAction* action);
@@ -118,7 +118,7 @@ private:
     QStringList trackIdList;
     QStringList callsignList;
 
-    bool manualUpdateRequested = false; ///< Guards explicit list rendering and update phases
+    bool listUpdateGuard = false; ///< Guards explicit list rendering and update phases
 
     bool callsignFilterActive = false;
     bool trackIdFilterActive = false;

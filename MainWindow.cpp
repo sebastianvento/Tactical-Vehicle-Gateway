@@ -29,12 +29,10 @@
 #include <algorithm>
 
 /**
- * @brief Constructs and wires the main tactical gateway UI.
+ * @brief Constructs and wires the main application UI.
  *
- * Responsible for:
- *  - Initializing core data and controller objects
- *  - Building the full UI layout hierarchy
- *  - Connecting UI state to filtering, sorting, and simulation logic
+ * Initializes data sources, builds the UI layout,
+ * and connects UI state to filtering, sorting, and simulation logic.
  */
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     // --- DATA & CORE INITIALIZATION ---
@@ -388,7 +386,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
 }
 
 // --- Filtering Logic ---
-// Resolves UI state into filter criteria and delegates evaluation to the controller.
+// Resolves current UI state and UI conventions into filter criteria.
 FilterCriteria MainWindow::filterFunction() const {
     FilterCriteria criteria;
 
@@ -876,7 +874,7 @@ void MainWindow::onSimulationTick() {
     const double targetY = targetYLine->text().toDouble();
     controller->updateSimulation(targetX, targetY);
     if (resultsList->count() > 0 && liveUpdatesBox->isChecked()) {
-        manualUpdateRequested = true;
+        listUpdateGuard = true;
         switch (currentSortMode) {
         case SortMode::DistanceAsc:
             sortByDistanceAsc();
@@ -888,7 +886,7 @@ void MainWindow::onSimulationTick() {
             printList();
             break;
         }
-        manualUpdateRequested = false;
+        listUpdateGuard = false;
     }
 }
 
@@ -896,7 +894,7 @@ void MainWindow::onSimulationTick() {
 // UI-driven handlers for ordering asset views.
 void MainWindow::sortByFuelAsc() {
     currentSortMode = SortMode::FuelAsc;
-    manualUpdateRequested = true;
+    listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
         auto& fv = controller->filteredVehicles;
@@ -910,12 +908,12 @@ void MainWindow::sortByFuelAsc() {
         sortButton->setText("Fuel: Critical First");
         printList();
     }
-    manualUpdateRequested = false;
+    listUpdateGuard = false;
 }
 
 void MainWindow::sortByFuelDesc() {
     currentSortMode = SortMode::FuelDesc;
-    manualUpdateRequested = true;
+    listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
         auto& fv = controller->filteredVehicles;
@@ -929,12 +927,12 @@ void MainWindow::sortByFuelDesc() {
         sortButton->setText("Fuel: Full First");
         printList();
     }
-    manualUpdateRequested = false;
+    listUpdateGuard = false;
 }
 
 void MainWindow::sortByPriorityAsc() {
     currentSortMode = SortMode::PriorityAsc;
-    manualUpdateRequested = true;
+    listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
         auto& fv = controller->filteredVehicles;
@@ -948,12 +946,12 @@ void MainWindow::sortByPriorityAsc() {
         sortButton->setText("Priority (A-Z)");
         printList();
     }
-    manualUpdateRequested = false;
+    listUpdateGuard = false;
 }
 
 void MainWindow::sortByPriorityDesc() {
     currentSortMode = SortMode::PriorityDesc;
-    manualUpdateRequested = true;
+    listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
         auto& fv = controller->filteredVehicles;
@@ -967,12 +965,12 @@ void MainWindow::sortByPriorityDesc() {
         sortButton->setText("Priority (Z-A)");
         printList();
     }
-    manualUpdateRequested = false;
+    listUpdateGuard = false;
 }
 
 void MainWindow::sortByClassificationAsc() {
     currentSortMode = SortMode::ClassificationAsc;
-    manualUpdateRequested = true;
+    listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
         auto& fv = controller->filteredVehicles;
@@ -986,12 +984,12 @@ void MainWindow::sortByClassificationAsc() {
         sortButton->setText("Classification (A-Z)");
         printList();
     }
-    manualUpdateRequested = false;
+    listUpdateGuard = false;
 }
 
 void MainWindow::sortByClassificationDesc() {
     currentSortMode = SortMode::ClassificationDesc;
-    manualUpdateRequested = true;
+    listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
         auto& fv = controller->filteredVehicles;
@@ -1005,12 +1003,12 @@ void MainWindow::sortByClassificationDesc() {
         sortButton->setText("Classification (Z-A)");
         printList();
     }
-    manualUpdateRequested = false;
+    listUpdateGuard = false;
 }
 
 void MainWindow::sortByDistanceAsc() {
     currentSortMode = SortMode::DistanceAsc;
-    manualUpdateRequested = true;
+    listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
         auto& fv = controller->filteredVehicles;
@@ -1024,12 +1022,12 @@ void MainWindow::sortByDistanceAsc() {
         sortButton->setText("Distance: Closest First");
         printList();
     }
-    manualUpdateRequested = false;
+    listUpdateGuard = false;
 }
 
 void MainWindow::sortByDistanceDesc() {
     currentSortMode = SortMode::DistanceDesc;
-    manualUpdateRequested = true;
+    listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
         auto& fv = controller->filteredVehicles;
@@ -1043,7 +1041,7 @@ void MainWindow::sortByDistanceDesc() {
         sortButton->setText("Distance: Farthest First");
         printList();
     }
-    manualUpdateRequested = false;
+    listUpdateGuard = false;
 }
 
 // --- Display Logic  ---
@@ -1051,12 +1049,12 @@ void MainWindow::sortByDistanceDesc() {
 
 // Displays results and applies default distance-based ordering.
 void MainWindow::displayButtonClicked() {
-    manualUpdateRequested = true;
+    listUpdateGuard = true;
     FilterCriteria criteria = filterFunction();
     controller->applyFilter(criteria);
     printList();
     sortByDistanceAsc();
-    manualUpdateRequested = false;
+    listUpdateGuard = false;
 }
 
 void MainWindow::updateDisplayButtonPreview() {
@@ -1073,7 +1071,7 @@ void MainWindow::updateDisplayButtonPreview() {
 }
 
 void MainWindow::printList() {
-    if (!manualUpdateRequested) return;
+    if (!listUpdateGuard) return;
 
     resultsList->clear();
 
