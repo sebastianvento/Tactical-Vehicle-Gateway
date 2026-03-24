@@ -11,7 +11,7 @@
 
 * **Data Management & Persistence**  
   Uses `QJsonDocument` for deterministic JSON ingestion. The architecture follows a **master–derived view pattern**:
-  * Authoritative ownership in `std::deque<TacticalVehicle>`
+  * Primary data ownership in `std::deque<TacticalVehicle>`
   * Filtered views represented as `std::vector<const TacticalVehicle*>`  
   This ensures memory safety, pointer stability, cache-friendly iteration, and no duplication of vehicle data.
 
@@ -40,8 +40,8 @@
   * Telemetry ranges (Fuel %, Distance to target)
   * Affiliation (Friendly, Hostile, Neutral, Unknown)
 
-* **Outcome-Based Filter Activation**  
-  The system defines “filter active” by result-set divergence rather than UI intent. If all vehicles still match the criteria, the system correctly treats filtering as inactive—avoiding misleading UI states.
+* **Divergence-Based Filter Logic**  
+  The system evaluates filter necessity by comparing the current result-set against the total dataset. If all vehicles match the criteria, the filtering state is treated as inactive to maintain UI consistency.
 
 * **Tactical Visualization**  
   Results are rendered in a monospaced layout and color-coded by affiliation:
@@ -49,15 +49,15 @@
   * Hostile → Red
   * Neutral / Unknown → White 
 
-* **Standards Awareness**  
-  Native support for STANAG 4569 protection levels (1–6) and structural readiness for APP-6 / MIL-STD-2525 symbology integration via NATO icon identifiers.
+* **Domain Standards Support**  
+  Includes data structures for STANAG 4569 protection levels (1–6) and provides structural identifiers for MIL-STD-2525 symbology mapping.
 
 ---
 
 ### 2. Interaction, Control & Reliability
 
-* **Explicit Operator Control**  
-  Filtering, sorting, and rendering are intentionally decoupled. Results are only rendered when explicitly requested or when live updates are enabled—preventing unnecessary UI re-renders and ensuring updates occur only via explicit user action.
+* **Decoupled Logic & Rendering**  
+  Filtering, sorting, and UI rendering are decoupled to optimize performance. UI updates are triggered via explicit user requests or toggled live updates, preventing redundant re-renders.
 
 * **Live Simulation Updates**  
   When enabled, both the main list and per-entity dialog views update dynamically as the simulation advances, without duplicating simulation logic or violating data ownership rules.
@@ -111,7 +111,7 @@ The project is organized into decoupled layers of responsibility:
 * **`RangeSlider`**  
   A reusable, standalone dual-handle slider widget for intuitive range-based input.
 
-This structure ensures separation of concerns, testability, and safe long-term evolution of both UI and domain logic.
+This structure ensures separation of concerns, facilitates unit testing, and maintains the extensibility of both UI and domain logic.
 
 ---
 
