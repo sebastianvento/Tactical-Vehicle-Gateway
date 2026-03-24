@@ -4,7 +4,7 @@
 
 ---
 
-## 🛠 Technical Highlights
+## 🛠 Technical Implementation
 
 * **Custom UI Components**  
   Includes a custom `RangeSlider` widget implemented by inheriting from `QWidget` and overriding low-level event handlers (`paintEvent`, `mousePressEvent`, `mouseMoveEvent`) providing range-based input functionality not available in the standard Qt widget library.
@@ -27,7 +27,7 @@
 
 ---
 
-## 📡 Operational Features
+## 📡 Functional Capabilities
 
 ### 1. Situational Awareness (SA)
 
@@ -43,7 +43,7 @@
 * **Divergence-Based Filter Logic**  
   The system evaluates filter necessity by comparing the current result-set against the total dataset. If all vehicles match the criteria, the filtering state is treated as inactive to maintain UI consistency.
 
-* **Tactical Visualization**  
+* **Affiliation-Based Rendering**  
   Results are rendered in a monospaced layout and color-coded by affiliation:
   * Friendly → Blue
   * Hostile → Red
@@ -54,7 +54,7 @@
 
 ---
 
-### 2. Interaction, Control & Reliability
+### 2. Control Logic & Input Validation
 
 * **Decoupled Logic & Rendering**  
   Filtering, sorting, and UI rendering are decoupled to optimize performance. UI updates are triggered via explicit user requests or toggled live updates, preventing redundant re-renders.
@@ -69,7 +69,7 @@
 
 ---
 
-## 🧭 Entity Inspection & Detail View
+## 🧭 Entity Data Visualization
 
 * **Per-Asset Dialogs**  
   Double-clicking an asset opens a dedicated entity dialog displaying:
