@@ -127,7 +127,11 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
         const double distPerSecond = v.speed / 3.6;
 
         // Integrate position
+        // xt+1​=xt​+d⋅cos(θ)
+        // Päivitän sijainnin trigonometrisesti lisäämällä kuljetun matkan projektion x-akselille kosinin avulla.
         v.posX += distPerSecond * std::cos(rad);
+        // yt+1​=yt​+d⋅sin(θ)
+        // Lasken liikkeen projektion x- ja y-akseleille kosinin ja sini-funktion avulla, eli teen 2D-vektorin hajotelman kulman perusteella.
         v.posY += distPerSecond * std::sin(rad);
 
         // Update target-relative distance

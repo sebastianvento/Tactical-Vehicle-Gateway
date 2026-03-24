@@ -1,13 +1,13 @@
 # Tactical Vehicle Gateway (TVG)
 
-**Tactical Vehicle Gateway** is an advanced C++/Qt situational awareness system for monitoring, filtering, sorting, and simulating tactical assets in real time. The application combines robust data persistence, deterministic kinematic simulation, and a modular, architecture-driven UI suitable for operational and analytical contexts.
+**Tactical Vehicle Gateway** is an C++/Qt situational awareness system for monitoring, filtering, sorting, and simulating tactical assets in real time. The application combines data persistence, deterministic kinematic simulation, and a modular UI suitable for operational and analytical contexts.
 
 ---
 
 ## 🛠 Technical Highlights
 
 * **Custom UI Components**  
-  Includes a bespoke `RangeSlider` widget built from first principles by inheriting from `QWidget` and overriding low-level event handlers (`paintEvent`, `mousePressEvent`, `mouseMoveEvent`). This demonstrates control over rendering, interaction, and value–pixel mapping beyond standard Qt widgets.
+  Includes a custom `RangeSlider` widget implemented by inheriting from `QWidget` and overriding low-level event handlers (`paintEvent`, `mousePressEvent`, `mouseMoveEvent`) providing range-based input functionality not available in the standard Qt widget library.
 
 * **Data Management & Persistence**  
   Uses `QJsonDocument` for deterministic JSON ingestion. The architecture follows a **master–derived view pattern**:
@@ -57,12 +57,12 @@
 ### 2. Interaction, Control & Reliability
 
 * **Explicit Operator Control**  
-  Filtering, sorting, and rendering are intentionally decoupled. Results are only rendered when explicitly requested or when live updates are enabled—preventing unintended UI churn and preserving operator intent.
+  Filtering, sorting, and rendering are intentionally decoupled. Results are only rendered when explicitly requested or when live updates are enabled—preventing unnecessary UI re-renders and ensuring updates occur only via explicit user action.
 
 * **Live Simulation Updates**  
   When enabled, both the main list and per-entity dialog views update dynamically as the simulation advances, without duplicating simulation logic or violating data ownership rules.
 
-* **Robust Input Handling**  
+* **Input Validation and Constraints**  
   * `QCompleter` enables rapid and error-resistant callsign and track ID selection.
   * `QDoubleValidator` enforces numeric correctness for mission target coordinates.
   * Range sliders and text inputs remain synchronized via signal blocking to prevent feedback loops.
@@ -85,7 +85,7 @@
 
 ## 🏗 System Architecture
 
-The project is organized into clearly separated layers of responsibility:
+The project is organized into decoupled layers of responsibility:
 
 * **`TacticalVehicle`**  
   A lightweight data model encapsulating identity, classification, capabilities, and dynamic telemetry.
@@ -111,7 +111,7 @@ The project is organized into clearly separated layers of responsibility:
 * **`RangeSlider`**  
   A reusable, standalone dual-handle slider widget for intuitive range-based input.
 
-This structure ensures strong separation of concerns, testability, and safe long-term evolution of both UI and domain logic.
+This structure ensures separation of concerns, testability, and safe long-term evolution of both UI and domain logic.
 
 ---
 
