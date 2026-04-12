@@ -92,6 +92,9 @@ private slots:
     void sortByPriorityAsc();
     void sortByPriorityDesc();
 
+    void sortByThreatAsc();
+    void sortByThreatDesc();
+
     // --- Simulation & Background Tasks ---
     void onSimulationTick(); ///< Periodic update for dynamic asset data
 
@@ -106,7 +109,9 @@ private:
         PriorityAsc,
         PriorityDesc,
         ClassificationAsc,
-        ClassificationDesc
+        ClassificationDesc,
+        ThreatAsc,
+        ThreatDesc
     };
 
     SortMode currentSortMode = SortMode::None;

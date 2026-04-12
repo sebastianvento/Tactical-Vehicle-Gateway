@@ -148,3 +148,11 @@ bool TacticalVehicleData::sortByClassificationAsc(const TacticalVehicle* a, cons
 bool TacticalVehicleData::sortByClassificationDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->classification > b->classification;
 }
+
+bool TacticalVehicleData::sortByThreatAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
+    return a->threatScore < b->threatScore;
+}
+
+bool TacticalVehicleData::sortByThreatDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
+    return a->threatScore > b->threatScore;
+}

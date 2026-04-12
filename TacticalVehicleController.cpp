@@ -128,15 +128,47 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
 
         // Integrate position
         // xt+1​=xt​+d⋅cos(θ)
-        // Päivitän sijainnin trigonometrisesti lisäämällä kuljetun matkan projektion x-akselille kosinin avulla.
         v.posX += distPerSecond * std::cos(rad);
         // yt+1​=yt​+d⋅sin(θ)
-        // Lasken liikkeen projektion x- ja y-akseleille kosinin ja sini-funktion avulla, eli teen 2D-vektorin hajotelman kulman perusteella.
         v.posY += distPerSecond * std::sin(rad);
 
         // Update target-relative distance
         const double dx = targetX - v.posX;
         const double dy = targetY - v.posY;
         v.distanceToTarget = std::sqrt(dx * dx + dy * dy);
+    }
+}
+
+void TacticalVehicleController::updateThreatScore() {
+    for (auto& v : data.vehiclesMutable()) {
+        // Normalize components to 0–1 and combine
+        double distanceFactor   = 1.0 - std::min(v.distanceToTarget / 20000.0, 1.0);
+        double speedFactor      = std::min(v.speed / v.maxSpeed, 1.0);
+
+        // Priority mapping
+        double priorityFactor = 0.0;
+        if (v.priority == "Flash") priorityFactor = 1.0;
+        else if (v.priority == "High") priorityFactor = 0.75;
+        else if (v.priority == "Routine") priorityFactor = 0.4;
+        else if (v.priority == "Low") priorityFactor = 0.1;
+
+        // Affiliation mapping
+        double affiliationFactor = 0.0;
+        if (v.affiliation == "Hostile") affiliationFactor = 1.0;
+        else if (v.affiliation == "Unknown") affiliationFactor = 0.6;
+        else if (v.affiliation == "Neutral") affiliationFactor = 0.2;
+        else if (v.affiliation == "Friendly") affiliationFactor = 0.0;
+
+        // Final weighted score
+        double threatScore =
+            100.0 * (
+                0.4 * distanceFactor +
+                0.2 * speedFactor +
+                0.25 * priorityFactor +
+                0.15 * affiliationFactor
+                );
+
+        // Assign to entity
+        v.threatScore = threatScore;
     }
 }

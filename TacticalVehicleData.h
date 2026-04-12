@@ -49,6 +49,10 @@ public:
     static bool sortByClassificationAsc(const TacticalVehicle *a, const TacticalVehicle *b);
     static bool sortByClassificationDesc(const TacticalVehicle *a, const TacticalVehicle *b);
 
+    // Threat-based
+    static bool sortByThreatAsc(const TacticalVehicle* a, const TacticalVehicle* b);
+    static bool sortByThreatDesc(const TacticalVehicle* a, const TacticalVehicle* b);
+
 private:
     // --- Data Storage ---
     std::deque<TacticalVehicle> allVehicles; ///< Master container owning all vehicles

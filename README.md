@@ -16,7 +16,7 @@
   This ensures memory safety, pointer stability, cache-friendly iteration, and no duplication of vehicle data.
 
 * **Time-Stepped Simulation Engine**  
-  A timed simulation heartbeat (`QTimer`) updates vehicle kinematics and recalculates distances relative to a user-defined mission target. Simulation logic is isolated in the controller layer and uses vector mathematics, trigonometry (`std::cos`, `std::sin`), and Euclidean distance calculations.
+  A timed simulation heartbeat (`QTimer`) updates vehicle kinematics and recalculates distances relative to a user-defined mission target. Simulation logic is isolated in the controller layer and uses vector mathematics, trigonometry (`std::cos`, `std::sin`), and Euclidean distance calculations. Derived threat score is computed during simulation update cycle.
 
 * **Algorithmic Efficiency & Sorting**  
   Sorting is implemented using static predicate functions and `std::sort`, supporting both pointer-based filtered views and in-place sorting of the master dataset. Assets can be ordered by:
@@ -24,6 +24,7 @@
   * Fuel criticality
   * Strategic priority
   * Classification
+  * Threat score
 
 ---
 
@@ -77,9 +78,10 @@
   * Dynamic telemetry (distance, speed, heading)
   * Capabilities and protection level
   * Fuel and ammunition estimates
+  * Threat score 
 
 * **Live Entity Telemetry**  
-  Entity dialogs can subscribe to live simulation updates independently of the main list, reflecting real-time kinematic changes without redundant computation.
+  Entity dialogs can subscribe to live simulation updates independently of the main list, reflecting real-time kinematic changes and threat calculation without redundant computation.
 
 ---
 
@@ -101,6 +103,7 @@ The project is organized into decoupled layers of responsibility:
   * Applies filter criteria
   * Maintains derived filtered views
   * Advances simulation state
+  * Computes threat score
 
 * **`MainWindow`**  
   The UI orchestration layer handling:

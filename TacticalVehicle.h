@@ -41,6 +41,9 @@ struct TacticalVehicle {
     double fuelLevel = 100.0;      ///< Remaining fuel percentage (0-100)
     double ammunitionLevel = 100.0;///< Remaining ammunition percentage (0-100)
     double distanceToTarget = 0.0; ///< Euclidean distance to mission target (meters)
+
+    // --- Derived Metrics ---
+    double threatScore = 0.0;      ///< Computed score based on distance to target, speed, priority and affiliation
 };
 
 #endif // TACTICALVEHICLE_H

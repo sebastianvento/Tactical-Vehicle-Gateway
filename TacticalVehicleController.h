@@ -81,6 +81,7 @@ public:
 
     // --- Simulation ---
     void updateSimulation(double targetX, double targetY);
+    void updateThreatScore();
 
     // --- Derived Views ---
     std::vector<const TacticalVehicle*> filteredVehicles;

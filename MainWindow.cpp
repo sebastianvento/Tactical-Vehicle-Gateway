@@ -280,6 +280,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     QAction *actionPriorityDesc = new QAction("Priority (Z-A)", this);
     QAction *actionClassAsc = new QAction("Classification (A-Z)", this);
     QAction *actionClassDesc = new QAction("Classification (Z-A)", this);
+    QAction *actionThreatAsc = new QAction("Threat: Lowest First", this);
+    QAction *actionThreatDesc = new QAction("Threat: Highest First", this);
     sortMenu->addAction(actionDistAsc);
     sortMenu->addAction(actionDistDesc);
     sortMenu->addAction(actionFuelAsc);
@@ -288,6 +290,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     sortMenu->addAction(actionPriorityDesc);
     sortMenu->addAction(actionClassAsc);
     sortMenu->addAction(actionClassDesc);
+    sortMenu->addAction(actionThreatAsc);
+    sortMenu->addAction(actionThreatDesc);
     sortButton->setMenu(sortMenu);
     sortBarLayout->addWidget(sortButton);
     rightPanel->addLayout(sortBarLayout);
@@ -351,6 +355,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     connect(actionPriorityDesc, &QAction::triggered, this, &MainWindow::sortByPriorityDesc);
     connect(actionClassAsc, &QAction::triggered, this, &MainWindow::sortByClassificationAsc);
     connect(actionClassDesc, &QAction::triggered, this, &MainWindow::sortByClassificationDesc);
+    connect(actionThreatAsc, &QAction::triggered, this, &MainWindow::sortByThreatAsc);
+    connect(actionThreatDesc, &QAction::triggered, this, &MainWindow::sortByThreatDesc);
 
     // Application Actions
     connect(displayButton, &QPushButton::clicked, this, &MainWindow::displayButtonClicked);
@@ -873,6 +879,7 @@ void MainWindow::onSimulationTick() {
     const double targetX = targetXLine->text().toDouble();
     const double targetY = targetYLine->text().toDouble();
     controller->updateSimulation(targetX, targetY);
+    controller->updateThreatScore();
     if (resultsList->count() > 0 && liveUpdatesBox->isChecked()) {
         listUpdateGuard = true;
         switch (currentSortMode) {
@@ -1044,6 +1051,44 @@ void MainWindow::sortByDistanceDesc() {
     listUpdateGuard = false;
 }
 
+void MainWindow::sortByThreatAsc() {
+    currentSortMode = SortMode::ThreatAsc;
+    listUpdateGuard = true;
+
+    if (resultsList->count() > 0) {
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByThreatAsc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByThreatAsc(&a, &b); });
+        }
+        sortButton->setText("Threat: Lowest First");
+        printList();
+    }
+    listUpdateGuard = false;
+}
+
+void MainWindow::sortByThreatDesc() {
+    currentSortMode = SortMode::ThreatDesc;
+    listUpdateGuard = true;
+
+    if (resultsList->count() > 0) {
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByThreatDesc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByThreatDesc(&a, &b); });
+        }
+        sortButton->setText("Threat: Highest First");
+        printList();
+    }
+    listUpdateGuard = false;
+}
+
 // --- Display Logic  ---
 // Functions responsible for displaying data to the user interface.
 
@@ -1161,6 +1206,7 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
     QListWidgetItem *distanceItem = new QListWidgetItem;
     QListWidgetItem *speedItem = new QListWidgetItem;
     QListWidgetItem *headingItem = new QListWidgetItem;
+    QListWidgetItem *threatItem = new QListWidgetItem;
     for (const auto& vehicle : tacticalVehicleDb->vehicles()) {
         if (vehicle.callsign == extractedCallsign) {
             QString dCall =  ("Callsign:           " + extractedCallsign);
@@ -1206,6 +1252,7 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
             QString dProt =  ("Protection Level:   " + QString::number(vehicle.protectionLevel, 'f', 0));
             QString dMSpe =  ("Maximum Speed:      " + QString::number(vehicle.maxSpeed, 'f', 0) + " km/h");
             QString dProp =  ("Propulsion:         " + vehicle.propulsion);
+            QString dThre =  ("Threat Score:       " + QString::number(vehicle.threatScore, 'f', 0));
             new QListWidgetItem(dCall, entityList);
             new QListWidgetItem(dTrack, entityList);
             new QListWidgetItem(dPrio, entityList);
@@ -1227,6 +1274,8 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
             new QListWidgetItem(dProt, entityList);
             new QListWidgetItem(dMSpe, entityList);
             new QListWidgetItem(dProp, entityList);
+            threatItem->setText(dThre);
+            entityList->insertItem(19, threatItem);
 
             if (vehicle.affiliation.contains("Friendly", Qt::CaseInsensitive)) {
                 entityList->setStyleSheet("QListWidget { color: rgb(0, 162, 232); }");
@@ -1245,6 +1294,7 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
                 distanceItem->setText("Distance to target: " +QString::number(vehicleUpdate.distanceToTarget, 'f', 0) + " m");
                 speedItem->setText   ("Speed:              " + QString::number(vehicleUpdate.speed, 'f', 0) + " km/h");
                 headingItem->setText ("Heading:            " + QString::number(vehicleUpdate.heading, 'f', 0) + "°");
+                threatItem->setText ("Threat Score:        " + QString::number(vehicleUpdate.threatScore, 'f', 0));
             }
         }
     });
