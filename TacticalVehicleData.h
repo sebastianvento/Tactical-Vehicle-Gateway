@@ -16,14 +16,10 @@
  */
 class TacticalVehicleData {
 public:
-    // --- Lifecycle ---
+    // --- Construction ---
     TacticalVehicleData();
 
     // --- Persistence ---
-    /**
-     * @brief Loads and parses vehicle data from a JSON resource.
-     * @param path File system or Qt resource path (e.g. ":/data/vehicles.json")
-     */
     void loadVehiclesFromJson(const QString &path);
 
     // --- Data Access ---
@@ -33,25 +29,20 @@ public:
     // --- Sorting Predicates ---
     // Stateless comparators intended for std::sort on pointer-based views.
 
-    // Distance-based
     static bool sortByDistanceAsc(const TacticalVehicle *a, const TacticalVehicle *b);
     static bool sortByDistanceDesc(const TacticalVehicle *a, const TacticalVehicle *b);
 
-    // Fuel-based
-    static bool sortByFuelAsc(const TacticalVehicle *a, const TacticalVehicle *b);
-    static bool sortByFuelDesc(const TacticalVehicle *a, const TacticalVehicle *b);
+    static bool sortByThreatAsc(const TacticalVehicle* a, const TacticalVehicle* b);
+    static bool sortByThreatDesc(const TacticalVehicle* a, const TacticalVehicle* b);
 
-    // Priority-based
     static bool sortByPriorityAsc(const TacticalVehicle *a, const TacticalVehicle *b);
     static bool sortByPriorityDesc(const TacticalVehicle *a, const TacticalVehicle *b);
 
-    // Classification-based
+    static bool sortByFuelAsc(const TacticalVehicle *a, const TacticalVehicle *b);
+    static bool sortByFuelDesc(const TacticalVehicle *a, const TacticalVehicle *b);
+
     static bool sortByClassificationAsc(const TacticalVehicle *a, const TacticalVehicle *b);
     static bool sortByClassificationDesc(const TacticalVehicle *a, const TacticalVehicle *b);
-
-    // Threat-based
-    static bool sortByThreatAsc(const TacticalVehicle* a, const TacticalVehicle* b);
-    static bool sortByThreatDesc(const TacticalVehicle* a, const TacticalVehicle* b);
 
 private:
     // --- Data Storage ---

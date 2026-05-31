@@ -28,12 +28,12 @@
 #include <vector>
 #include <algorithm>
 
-/**
- * @brief Constructs and wires the main application UI.
- *
- * Initializes data sources, builds the UI layout,
- * and connects UI state to filtering, sorting, and simulation logic.
- */
+// --- MainWindow ---
+// Owns UI state, widget orchestration, and presentation logic.
+// Resolves user input into filter criteria and delegates
+// domain operations to TacticalVehicleController.
+
+// --- Construction ---
 MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     // --- DATA & CORE INITIALIZATION ---
     tacticalVehicleDb = std::make_unique<TacticalVehicleData>();
@@ -56,8 +56,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     rightPanel->setSpacing(0);
 
     // --- LEFT PANEL: UI GROUPS ---
-    // Capability Flags
-    QGroupBox *capGroup = new QGroupBox("Operational Capabilities");
+    // Capability
+    QGroupBox *capGroup = new QGroupBox("Capabilities");
     QGridLayout *capGrid = new QGridLayout();
 
     capGrid->addWidget(new QLabel("SATCOM Link"), 0, 0);
@@ -71,8 +71,8 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     capGroup->setLayout(capGrid);
     leftPanel->addWidget(capGroup);
 
-    // Identity Filters & Affiliation
-    QGroupBox *idGroup = new QGroupBox("Asset Identity & Affiliation");
+    // Identity
+    QGroupBox *idGroup = new QGroupBox("Identity && Affiliation");
     QGridLayout *idGrid = new QGridLayout();
 
     idGrid->addWidget(new QLabel("Callsign:"), 0, 0);
@@ -88,6 +88,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     trackIdSelectionPressed_Btn->setIcon(choiceDeletion);
     trackIdSelectionPressed_Btn->setVisible(false);
 
+    // Affiliation
     affiliationButton = new QPushButton("All Types");
     affiliationMenu = new QMenu(this);
     affiliationMenu->addAction("All Types");
@@ -108,12 +109,12 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     stratGrid->addWidget(new QLabel("Operational Domain:"), 0, 0);
     domainButton = new QPushButton("Select Domain");
     domainMenu = new QMenu(this);
-    domainMenu->addAction("Land");
     domainMenu->addAction("Air");
-    domainMenu->addAction("Maritime");
-    domainMenu->addAction("Subsurface");
-    domainMenu->addAction("Space");
     domainMenu->addAction("Electronic");
+    domainMenu->addAction("Land");
+    domainMenu->addAction("Maritime");
+    domainMenu->addAction("Space");
+    domainMenu->addAction("Subsurface");
     domainButton->setMenu(domainMenu);
     stratGrid->addWidget(domainButton, 0, 1);
     stratGrid->addWidget(domainSelectionPressed_Btn = new QPushButton(), 0, 2);
@@ -123,11 +124,11 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     stratGrid->addWidget(new QLabel("Propulsion Type:"), 1, 0);
     propulsionButton = new QPushButton("Select Type");
     propulsionMenu = new QMenu(this);
-    propulsionMenu->addAction("Wheeled");
-    propulsionMenu->addAction("Tracked");
-    propulsionMenu->addAction("Legged");
     propulsionMenu->addAction("Aerial");
+    propulsionMenu->addAction("Legged");
     propulsionMenu->addAction("Maritime");
+    propulsionMenu->addAction("Tracked");
+    propulsionMenu->addAction("Wheeled");
     propulsionButton->setMenu(propulsionMenu);
     stratGrid->addWidget(propulsionButton, 1, 1);
     stratGrid->addWidget(propulsionSelectionPressed_Btn = new QPushButton(), 1, 2);
@@ -150,7 +151,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     stratGroup->setLayout(stratGrid);
     leftPanel->addWidget(stratGroup);
 
-    // Protection Constraints
+    // Protection
     QGroupBox *protGroup = new QGroupBox("Protection Level (STANAG 4569)");
     QHBoxLayout *protLayout = new QHBoxLayout();
 
@@ -175,12 +176,12 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     protGroup->setLayout(protLayout);
     leftPanel->addWidget(protGroup);
 
-    // Telemetry Ranges & Target Inputs
-    QGroupBox *teleGroup = new QGroupBox("Telemetry & Mission Target");
+    // Telemetry & Target Inputs
+    QGroupBox *teleGroup = new QGroupBox("Telemetry && Target");
     QGridLayout *teleGrid = new QGridLayout();
 
     QIntValidator *fuelValidator = new QIntValidator(0,100, this);
-    teleGrid->addWidget(new QLabel("Fuel Level (%):"), 0, 0);
+    teleGrid->addWidget(new QLabel("Estimated Fuel Level (%):"), 0, 0);
     fuelSlider = new RangeSlider();
     fuelSlider->setRange(0, 100);
     fuelSlider->setValues(0, 100);
@@ -191,7 +192,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     fuelInputMax->setValidator(fuelValidator);
 
     QIntValidator *distanceValidator = new QIntValidator(0,10000, this);
-    teleGrid->addWidget(new QLabel("Distance to Target (m):"), 2, 0);
+    teleGrid->addWidget(new QLabel("Distance To Target (m):"), 2, 0);
     distanceSlider = new RangeSlider();
     distanceSlider->setRange(0, 10000);
     distanceSlider->setValues(0, 10000);
@@ -272,26 +273,26 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     sortBarLayout->addStretch();
     sortButton = new QPushButton("Sort");
     sortMenu = new QMenu(this);
-    QAction *actionDistAsc = new QAction("Distance: Closest First", this);
-    QAction *actionDistDesc = new QAction("Distance: Farthest First", this);
-    QAction *actionFuelAsc = new QAction("Fuel: Critical First", this);
-    QAction *actionFuelDesc = new QAction("Fuel: Full First", this);
-    QAction *actionPriorityAsc = new QAction("Priority (A-Z)", this);
-    QAction *actionPriorityDesc = new QAction("Priority (Z-A)", this);
+    QAction *actionDistAsc = new QAction("Distance To Target: Closest First", this);
+    QAction *actionDistDesc = new QAction("Distance To Target: Farthest First", this);
+    QAction *actionThreatAsc = new QAction("Threat Score: Lowest First", this);
+    QAction *actionThreatDesc = new QAction("Threat Score: Highest First", this);
+    QAction *actionPriorityAsc = new QAction("Strategic Priority (A-Z)", this);
+    QAction *actionPriorityDesc = new QAction("Strategic Priority (Z-A)", this);
+    QAction *actionFuelAsc = new QAction("Estimated Fuel Level: Critical First", this);
+    QAction *actionFuelDesc = new QAction("Estimated Fuel Level: Full First", this);
     QAction *actionClassAsc = new QAction("Classification (A-Z)", this);
     QAction *actionClassDesc = new QAction("Classification (Z-A)", this);
-    QAction *actionThreatAsc = new QAction("Threat: Lowest First", this);
-    QAction *actionThreatDesc = new QAction("Threat: Highest First", this);
     sortMenu->addAction(actionDistAsc);
     sortMenu->addAction(actionDistDesc);
-    sortMenu->addAction(actionFuelAsc);
-    sortMenu->addAction(actionFuelDesc);
-    sortMenu->addAction(actionPriorityAsc);
-    sortMenu->addAction(actionPriorityDesc);
-    sortMenu->addAction(actionClassAsc);
-    sortMenu->addAction(actionClassDesc);
     sortMenu->addAction(actionThreatAsc);
     sortMenu->addAction(actionThreatDesc);
+    sortMenu->addAction(actionPriorityAsc);
+    sortMenu->addAction(actionPriorityDesc);
+    sortMenu->addAction(actionFuelAsc);
+    sortMenu->addAction(actionFuelDesc);
+    sortMenu->addAction(actionClassAsc);
+    sortMenu->addAction(actionClassDesc);
     sortButton->setMenu(sortMenu);
     sortBarLayout->addWidget(sortButton);
     rightPanel->addLayout(sortBarLayout);
@@ -306,13 +307,13 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     setLayout(mainLayout);
 
     // --- SIGNAL & SLOT CONNECTIONS ---
-    // Capability Flags
+    // Capability
     connect(cbHasSatCom, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
     connect(cbIsAmphibious, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
     connect(cbIsUnmanned, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
     connect(cbHasActiveDefense, &QCheckBox::toggled, this, &MainWindow::updateDisplayButtonPreview);
 
-    // Identity Filters
+    // Identity
     connect(callsignLine, &QLineEdit::textChanged, this, &MainWindow::callsignChanged);
     connect(callsignLine, &QLineEdit::returnPressed, this, &MainWindow::callsignReturnPressed);
     connect(callsignSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::callsignSelectionPressed);
@@ -320,20 +321,24 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     connect(trackIdLine, &QLineEdit::returnPressed, this, &MainWindow::trackIdReturnPressed);
     connect(trackIdSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::trackIdSelectionPressed);
 
-    // Strategic Classification & Affiliation
+    // Affiliation
     connect(affiliationMenu, &QMenu::triggered, this, &MainWindow::affiliationActionClicked);
+
+    // Strategic Classification
     connect(domainMenu, &QMenu::triggered, this, &MainWindow::domainActionClicked);
     connect(domainSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::domainSelectionPressed);
     connect(propulsionMenu, &QMenu::triggered, this, &MainWindow::propulsionActionClicked);
     connect(propulsionSelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::propulsionSelectionPressed);
     connect(priorityMenu, &QMenu::triggered, this, &MainWindow::priorityActionClicked);
     connect(prioritySelectionPressed_Btn, &QPushButton::clicked, this, &MainWindow::prioritySelectionPressed);
+
+    // Protection
     connect(protectionMenuMin, &QMenu::triggered, this, &MainWindow::protectionMenuMinClicked);
     connect(protectionMenuMax, &QMenu::triggered, this, &MainWindow::protectionMenuMaxClicked);
     connect(protectionSelectionMinPressed_Btn, &QPushButton::clicked, this, &MainWindow::protectionSelectionMinPressed);
     connect(protectionSelectionMaxPressed_Btn, &QPushButton::clicked, this, &MainWindow::protectionSelectionMaxPressed);
 
-    // Telemetry Ranges & Inputs
+    // Telemetry & Target Inputs
     connect(fuelSlider, &RangeSlider::valuesChanged, this, &MainWindow::fuelSliderChanged);
     connect(fuelInputMin, &QLineEdit::textChanged, this, &MainWindow::fuelInputMinChanged);
     connect(fuelInputMax, &QLineEdit::textChanged, this, &MainWindow::fuelInputMaxChanged);
@@ -363,7 +368,7 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
     connect(exitButton, &QPushButton::clicked, qApp, &QApplication::quit);
 
     // List Widget Dialog
-    connect(resultsList, &QListWidget::itemDoubleClicked, this, &MainWindow::listItemDoubleclicked);
+    connect(resultsList, &QListWidget::itemDoubleClicked, this, &MainWindow::listItemDoubleClicked);
 
     // --- AUTO-COMPLETE & DYNAMIC UPDATES ---
     // Populate Search Data
@@ -396,17 +401,20 @@ MainWindow::MainWindow(QWidget *parent) : QWidget(parent) {
 FilterCriteria MainWindow::filterFunction() const {
     FilterCriteria criteria;
 
-    // Capability Flags
+    // Capability
     criteria.hasSatCom = cbHasSatCom->isChecked();
     criteria.isAmphibious = cbIsAmphibious->isChecked();
     criteria.isUnmanned = cbIsUnmanned->isChecked();
     criteria.hasActiveDefense = cbHasActiveDefense->isChecked();
 
-    // Identity Filters
+    // Identity
     criteria.callsignActive = callsignFilterActive;
     criteria.callsign = activeCallsign;
     criteria.trackIdActive = trackIdFilterActive;
     criteria.trackId = activeTrackId;
+
+    // Affiliation
+    criteria.affiliation = activeAffiliation;
 
     // Strategic Classification
     criteria.domainActive = domainFilterActive;
@@ -418,7 +426,7 @@ FilterCriteria MainWindow::filterFunction() const {
     criteria.priorityActive = priorityFilterActive;
     criteria.priority = activePriority;
 
-    // Protection Constraints
+    // Protection
     criteria.protectionMinActive = protectionMinFilterActive;
     criteria.protectionMin = activeProtectionMin;
 
@@ -431,20 +439,17 @@ FilterCriteria MainWindow::filterFunction() const {
     criteria.distanceMin = distanceSlider->lowerValue();
     criteria.distanceMax = distanceSlider->upperValue();
 
-    // Affiliation
-    criteria.affiliation = activeAffiliation;
-
     return criteria;
 }
 
 void MainWindow::filtersCleared() {
-    // Capability Flags
+    // Capability
     cbHasSatCom->setCheckState(Qt::Unchecked);
     cbIsAmphibious->setCheckState(Qt::Unchecked);
     cbIsUnmanned->setCheckState(Qt::Unchecked);
     cbHasActiveDefense->setCheckState(Qt::Unchecked);
 
-    // Identity Filters
+    // Identity
     callsignFilterActive = false;
     activeCallsign.clear();
 
@@ -458,6 +463,10 @@ void MainWindow::filtersCleared() {
     trackIdSelectionPressed_Btn->setVisible(false);
     trackIdSelectionPressed_Btn->setText("");
     trackIdLine->setText("");
+
+    // Affiliation
+    affiliationButton->setText("All Types");
+    activeAffiliation = "All Types";
 
     // Strategic Classification
     domainFilterActive = false;
@@ -481,7 +490,7 @@ void MainWindow::filtersCleared() {
     prioritySelectionPressed_Btn->setText("");
     priorityButton->setText("Set Priority");
 
-    // Protection Constraints
+    // Protection
     protectionMinFilterActive = false;
     activeProtectionMin = 0;
 
@@ -500,17 +509,13 @@ void MainWindow::filtersCleared() {
         action->setVisible(true);
     }
 
-    // Telemetry Ranges
+    // Telemetry
     fuelInputMin->setText("0");
     fuelInputMax->setText("100");
     fuelSlider->setValues(0, 100);
     distanceInputMin->setText("0");
     distanceInputMax->setText("MAX (No Limit)");
     distanceSlider->setValues(0, 10000);
-
-    // Affiliation
-    affiliationButton->setText("All Types");
-    activeAffiliation = "All Types";
 
     updateDisplayButtonPreview();
 }
@@ -759,6 +764,59 @@ void MainWindow::protectionSelectionMaxPressed() {
     updateDisplayButtonPreview();
 }
 
+void MainWindow::fuelSliderChanged(int x, int y) {
+    fuelInputMin->blockSignals(true);
+    fuelInputMax->blockSignals(true);
+    if (x == 0) {
+        fuelInputMin->setText("0");
+    } else {
+        fuelInputMin->setText(QString::number(x));
+    }
+    if (y == 100) {
+        fuelInputMax->setText("100");
+    } else {
+        fuelInputMax->setText(QString::number(y));
+    }
+    fuelInputMin->blockSignals(false);
+    fuelInputMax->blockSignals(false);
+
+    updateDisplayButtonPreview();
+}
+
+void MainWindow::fuelInputMinChanged(const QString &fuelString) {
+    if (fuelInputMin->signalsBlocked()) return;
+
+    fuelSlider->blockSignals(true);
+    if (fuelString.isEmpty()) {
+        fuelSlider->setValues(0, fuelSlider->upperValue());
+        fuelInputMin->setPlaceholderText("0");
+    } else {
+        bool ok;
+        int val = fuelString.toInt(&ok);
+        if (ok) fuelSlider->setValues(val, fuelSlider->upperValue());
+    }
+    fuelSlider->blockSignals(false);
+
+    updateDisplayButtonPreview();
+}
+
+void MainWindow::fuelInputMaxChanged(const QString &fuelString) {
+    if (fuelInputMax->signalsBlocked()) return;
+
+    fuelSlider->blockSignals(true);
+    if (fuelString.isEmpty()) {
+        fuelSlider->setValues(fuelSlider->lowerValue(), 100);
+        fuelInputMax->setPlaceholderText("100");
+    } else {
+        bool ok;
+        int val = fuelString.toInt(&ok);
+        if (ok) fuelSlider->setValues(fuelSlider->lowerValue(), val);
+    }
+    fuelSlider->blockSignals(false);
+
+    updateDisplayButtonPreview();
+}
+
 void MainWindow::distanceSliderChanged(int x, int y) {
     distanceInputMin->blockSignals(true);
     distanceInputMax->blockSignals(true);
@@ -820,59 +878,6 @@ void MainWindow::distanceInputMaxChanged(const QString &distanceString) {
     updateDisplayButtonPreview();
 }
 
-void MainWindow::fuelSliderChanged(int x, int y) {
-    fuelInputMin->blockSignals(true);
-    fuelInputMax->blockSignals(true);
-    if (x == 0) {
-        fuelInputMin->setText("0");
-    } else {
-        fuelInputMin->setText(QString::number(x));
-    }
-    if (y == 100) {
-        fuelInputMax->setText("100");
-    } else {
-        fuelInputMax->setText(QString::number(y));
-    }
-    fuelInputMin->blockSignals(false);
-    fuelInputMax->blockSignals(false);
-
-    updateDisplayButtonPreview();
-}
-
-void MainWindow::fuelInputMinChanged(const QString &fuelString) {
-    if (fuelInputMin->signalsBlocked()) return;
-
-    fuelSlider->blockSignals(true);
-    if (fuelString.isEmpty()) {
-        fuelSlider->setValues(0, fuelSlider->upperValue());
-        fuelInputMin->setPlaceholderText("0");
-    } else {
-        bool ok;
-        int val = fuelString.toInt(&ok);
-        if (ok) fuelSlider->setValues(val, fuelSlider->upperValue());
-    }
-    fuelSlider->blockSignals(false);
-
-    updateDisplayButtonPreview();
-}
-
-void MainWindow::fuelInputMaxChanged(const QString &fuelString) {
-    if (fuelInputMax->signalsBlocked()) return;
-
-    fuelSlider->blockSignals(true);
-    if (fuelString.isEmpty()) {
-        fuelSlider->setValues(fuelSlider->lowerValue(), 100);
-        fuelInputMax->setPlaceholderText("100");
-    } else {
-        bool ok;
-        int val = fuelString.toInt(&ok);
-        if (ok) fuelSlider->setValues(fuelSlider->lowerValue(), val);
-    }
-    fuelSlider->blockSignals(false);
-
-    updateDisplayButtonPreview();
-}
-
 // --- Simulation Logic ---
 // Triggers controller-side simulation updates based on current UI target state.
 void MainWindow::onSimulationTick() {
@@ -889,6 +894,15 @@ void MainWindow::onSimulationTick() {
         case SortMode::DistanceDesc:
             sortByDistanceDesc();
             break;
+
+        case SortMode::ThreatAsc:
+            sortByThreatAsc();
+            break;
+
+        case SortMode::ThreatDesc:
+            sortByThreatDesc();
+            break;
+
         default:
             printList();
             break;
@@ -898,9 +912,9 @@ void MainWindow::onSimulationTick() {
 }
 
 // --- Sorting Logic ---
-// UI-driven handlers for ordering asset views.
-void MainWindow::sortByFuelAsc() {
-    currentSortMode = SortMode::FuelAsc;
+// UI-driven handlers for ordering vehicle views.
+void MainWindow::sortByDistanceAsc() {
+    currentSortMode = SortMode::DistanceAsc;
     listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
@@ -908,18 +922,18 @@ void MainWindow::sortByFuelAsc() {
         auto& av = tacticalVehicleDb->vehiclesMutable();
 
         if (controller->isFilterActive()) {
-            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelAsc);
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceAsc);
         } else {
-            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelAsc(&a, &b); });
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceAsc(&a, &b); });
         }
-        sortButton->setText("Fuel: Critical First");
+        sortButton->setText("Distance To Target: Closest First");
         printList();
     }
     listUpdateGuard = false;
 }
 
-void MainWindow::sortByFuelDesc() {
-    currentSortMode = SortMode::FuelDesc;
+void MainWindow::sortByDistanceDesc() {
+    currentSortMode = SortMode::DistanceDesc;
     listUpdateGuard = true;
 
     if (resultsList->count() > 0) {
@@ -927,11 +941,49 @@ void MainWindow::sortByFuelDesc() {
         auto& av = tacticalVehicleDb->vehiclesMutable();
 
         if (controller->isFilterActive()) {
-            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelDesc);
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceDesc);
         } else {
-            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelDesc(&a, &b); });
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceDesc(&a, &b); });
         }
-        sortButton->setText("Fuel: Full First");
+        sortButton->setText("Distance To Target: Farthest First");
+        printList();
+    }
+    listUpdateGuard = false;
+}
+
+void MainWindow::sortByThreatAsc() {
+    currentSortMode = SortMode::ThreatAsc;
+    listUpdateGuard = true;
+
+    if (resultsList->count() > 0) {
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByThreatAsc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByThreatAsc(&a, &b); });
+        }
+        sortButton->setText("Threat Score: Lowest First");
+        printList();
+    }
+    listUpdateGuard = false;
+}
+
+void MainWindow::sortByThreatDesc() {
+    currentSortMode = SortMode::ThreatDesc;
+    listUpdateGuard = true;
+
+    if (resultsList->count() > 0) {
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByThreatDesc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByThreatDesc(&a, &b); });
+        }
+        sortButton->setText("Threat Score: Highest First");
         printList();
     }
     listUpdateGuard = false;
@@ -950,7 +1002,7 @@ void MainWindow::sortByPriorityAsc() {
         } else {
             std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByPriorityAsc(&a, &b); });
         }
-        sortButton->setText("Priority (A-Z)");
+        sortButton->setText("Strategic Priority (A-Z)");
         printList();
     }
     listUpdateGuard = false;
@@ -969,7 +1021,45 @@ void MainWindow::sortByPriorityDesc() {
         } else {
             std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByPriorityDesc(&a, &b); });
         }
-        sortButton->setText("Priority (Z-A)");
+        sortButton->setText("Strategic Priority (Z-A)");
+        printList();
+    }
+    listUpdateGuard = false;
+}
+
+void MainWindow::sortByFuelAsc() {
+    currentSortMode = SortMode::FuelAsc;
+    listUpdateGuard = true;
+
+    if (resultsList->count() > 0) {
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelAsc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelAsc(&a, &b); });
+        }
+        sortButton->setText("Estimated Fuel Level: Critical First");
+        printList();
+    }
+    listUpdateGuard = false;
+}
+
+void MainWindow::sortByFuelDesc() {
+    currentSortMode = SortMode::FuelDesc;
+    listUpdateGuard = true;
+
+    if (resultsList->count() > 0) {
+        auto& fv = controller->filteredVehicles;
+        auto& av = tacticalVehicleDb->vehiclesMutable();
+
+        if (controller->isFilterActive()) {
+            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByFuelDesc);
+        } else {
+            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByFuelDesc(&a, &b); });
+        }
+        sortButton->setText("Estimated Fuel Level: Full First");
         printList();
     }
     listUpdateGuard = false;
@@ -1013,95 +1103,8 @@ void MainWindow::sortByClassificationDesc() {
     listUpdateGuard = false;
 }
 
-void MainWindow::sortByDistanceAsc() {
-    currentSortMode = SortMode::DistanceAsc;
-    listUpdateGuard = true;
-
-    if (resultsList->count() > 0) {
-        auto& fv = controller->filteredVehicles;
-        auto& av = tacticalVehicleDb->vehiclesMutable();
-
-        if (controller->isFilterActive()) {
-            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceAsc);
-        } else {
-            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceAsc(&a, &b); });
-        }
-        sortButton->setText("Distance: Closest First");
-        printList();
-    }
-    listUpdateGuard = false;
-}
-
-void MainWindow::sortByDistanceDesc() {
-    currentSortMode = SortMode::DistanceDesc;
-    listUpdateGuard = true;
-
-    if (resultsList->count() > 0) {
-        auto& fv = controller->filteredVehicles;
-        auto& av = tacticalVehicleDb->vehiclesMutable();
-
-        if (controller->isFilterActive()) {
-            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByDistanceDesc);
-        } else {
-            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByDistanceDesc(&a, &b); });
-        }
-        sortButton->setText("Distance: Farthest First");
-        printList();
-    }
-    listUpdateGuard = false;
-}
-
-void MainWindow::sortByThreatAsc() {
-    currentSortMode = SortMode::ThreatAsc;
-    listUpdateGuard = true;
-
-    if (resultsList->count() > 0) {
-        auto& fv = controller->filteredVehicles;
-        auto& av = tacticalVehicleDb->vehiclesMutable();
-
-        if (controller->isFilterActive()) {
-            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByThreatAsc);
-        } else {
-            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByThreatAsc(&a, &b); });
-        }
-        sortButton->setText("Threat: Lowest First");
-        printList();
-    }
-    listUpdateGuard = false;
-}
-
-void MainWindow::sortByThreatDesc() {
-    currentSortMode = SortMode::ThreatDesc;
-    listUpdateGuard = true;
-
-    if (resultsList->count() > 0) {
-        auto& fv = controller->filteredVehicles;
-        auto& av = tacticalVehicleDb->vehiclesMutable();
-
-        if (controller->isFilterActive()) {
-            std::sort(fv.begin(), fv.end(), TacticalVehicleData::sortByThreatDesc);
-        } else {
-            std::sort(av.begin(), av.end(), [](const auto& a, const auto& b) { return TacticalVehicleData::sortByThreatDesc(&a, &b); });
-        }
-        sortButton->setText("Threat: Highest First");
-        printList();
-    }
-    listUpdateGuard = false;
-}
-
-// --- Display Logic  ---
+// --- Display Logic ---
 // Functions responsible for displaying data to the user interface.
-
-// Displays results and applies default distance-based ordering.
-void MainWindow::displayButtonClicked() {
-    listUpdateGuard = true;
-    FilterCriteria criteria = filterFunction();
-    controller->applyFilter(criteria);
-    printList();
-    sortByDistanceAsc();
-    listUpdateGuard = false;
-}
-
 void MainWindow::updateDisplayButtonPreview() {
     FilterCriteria criteria = filterFunction();
 
@@ -1115,6 +1118,16 @@ void MainWindow::updateDisplayButtonPreview() {
         );
 }
 
+// Displays results and applies default distance-based ordering.
+void MainWindow::displayButtonClicked() {
+    listUpdateGuard = true;
+    FilterCriteria criteria = filterFunction();
+    controller->applyFilter(criteria);
+    printList();
+    sortByDistanceAsc();
+    listUpdateGuard = false;
+}
+
 void MainWindow::printList() {
     if (!listUpdateGuard) return;
 
@@ -1125,17 +1138,20 @@ void MainWindow::printList() {
     resultsList->setFont(monoFont);
 
     auto populateRow = [&](const QString& callsign, const QString& type, const QString& trackId,
-                           double fuel, double dist, int prot, const QString& affiliation) {
+                           double fuel, double dist, const QString& prio, const QString& classi, double threat, const QString& affiliation) {
 
-        QString cSign = callsign.leftJustified(18, ' ');
-        QString vType = type.leftJustified(20, ' ');
-        QString tId   = ("ID: " + trackId).leftJustified(18, ' ');
-        QString dDist = ("Distance to target: " + QString::number(dist, 'f', 0) + " m").leftJustified(32, ' ');
-        QString fFuel = ("Est. fuel level: " + QString::number(fuel, 'f', 1) + " %").leftJustified(24, ' ');
-        QString pProt = ("Protection level: " + QString::number(prot)).leftJustified(22, ' ');
+        QString cSign = callsign.leftJustified(14, ' ');
+        QString vType = type.leftJustified(16, ' ');
+        QString tId   = ("ID: " + trackId).leftJustified(13, ' ');
+        QString dDist = ("Dist. to target: " + QString::number(dist, 'f', 0) + " m").leftJustified(26, ' ');
+        QString fFuel = ("Est. fuel level: " + QString::number(fuel, 'f', 1) + " %").leftJustified(26, ' ');
+        QString pPrio = ("Strat. priority: " + prio).leftJustified(26, ' ');
+        QString cClassi = ("Class.: " + classi).leftJustified(26, ' ');
+        QString tScore = ("Threat.: " + QString::number(threat, 'f', 0)).leftJustified(0, ' ');
 
-        QString row = QString("%1 | %2 | %3 | %4 | %5 | %6")
-                          .arg(cSign).arg(vType).arg(tId).arg(dDist).arg(fFuel).arg(pProt);
+
+        QString row = QString("%1 | %2 | %3 | %4 | %5 | %6 | %7 | %8")
+                          .arg(cSign).arg(vType).arg(tId).arg(dDist).arg(fFuel).arg(pPrio).arg(cClassi).arg(tScore);
 
         QListWidgetItem* item = new QListWidgetItem(row, resultsList);
 
@@ -1155,7 +1171,9 @@ void MainWindow::printList() {
                         vehicle->trackId,
                         vehicle->fuelLevel,
                         vehicle->distanceToTarget,
-                        vehicle->protectionLevel,
+                        vehicle->priority,
+                        vehicle->classification,
+                        vehicle->threatScore,
                         vehicle->affiliation);
         }
     } else {
@@ -1165,15 +1183,17 @@ void MainWindow::printList() {
                         vehicle.trackId,
                         vehicle.fuelLevel,
                         vehicle.distanceToTarget,
-                        vehicle.protectionLevel,
+                        vehicle.priority,
+                        vehicle.classification,
+                        vehicle.threatScore,
                         vehicle.affiliation);
         }
     }
 }
 
-// --- Dialog Logic  ---
+// --- Dialog Logic ---
 // Slot responsible for entity dialog.
-void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
+void MainWindow::listItemDoubleClicked(QListWidgetItem *item) {
     entityDialog = new QDialog(this);
     entityDialog->setAttribute(Qt::WA_DeleteOnClose);
     entityDialog->show();
@@ -1209,71 +1229,70 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
     QListWidgetItem *threatItem = new QListWidgetItem;
     for (const auto& vehicle : tacticalVehicleDb->vehicles()) {
         if (vehicle.callsign == extractedCallsign) {
-            QString dCall =  ("Callsign:           " + extractedCallsign);
-            QString dTrack = ("Track ID:           " + vehicle.trackId);
-            QString dPrio =  ("Strategic Priority: " + vehicle.priority);
-            QString dDom =   ("Domain:             " + vehicle.domain);
-            QString dClas =  ("Classification:     " + vehicle.classification);
-            QString dTyp =   ("Type:               " + vehicle.type);
-            QString dDist =  ("Distance to target: " + QString::number(vehicle.distanceToTarget, 'f', 0) + " m");
-            QString dSpe =   ("Speed:              " + QString::number(vehicle.speed, 'f', 0) + " km/h");
-            QString dHea =   ("Heading:            " + QString::number(vehicle.heading, 'f', 0) + "°");
-            QString dFue =   ("Est. fuel level:    " + QString::number(vehicle.fuelLevel, 'f', 1) + " %");
-            QString dAmm =   ("Est. amm. level:    " + QString::number(vehicle.ammunitionLevel, 'f', 1) + " %");
-            QString dUnm;
-            if (vehicle.isUnmanned) {
-                dUnm = "Yes";
-            } else {
-                dUnm = "No";
-            }
-            dUnm =           ("Unmanned:           " + dUnm);
+            QString dCall =  ("Callsign:                    " + extractedCallsign);
+            QString dTrack = ("Track ID:                    " + vehicle.trackId);
+            QString dTyp =   ("Type:                        " + vehicle.type);
+            QString dClas =  ("Classification:              " + vehicle.classification);
+            QString dDom =   ("Operational domain:          " + vehicle.domain);
+            QString dProp =  ("Propulsion type:             " + vehicle.propulsion);
+            QString dPrio =  ("Strategic priority:          " + vehicle.priority);
+            QString dProt =  ("Protection level:            " + QString::number(vehicle.protectionLevel, 'f', 0));
             QString dSat;
             if (vehicle.hasSatCom) {
                 dSat = "Yes";
             } else {
                 dSat = "No";
             }
-            dSat =           ("Has SatCom:         " + dSat);
-            QString dAct;
-            if (vehicle.hasActiveDefense) {
-                dAct = "Yes";
-            } else {
-                dAct = "No";
-            }
-            dAct =           ("Has Active Defence: " + dAct);
+            dSat =           ("SATCOM Link:                 " + dSat);
             QString dAmp;
             if (vehicle.isAmphibious) {
                 dAmp = "Yes";
             }else {
                 dAmp = "No";
             }
-
-            dAmp =           ("Is Amphibious:      " + dAmp);
-            QString dProt =  ("Protection Level:   " + QString::number(vehicle.protectionLevel, 'f', 0));
-            QString dMSpe =  ("Maximum Speed:      " + QString::number(vehicle.maxSpeed, 'f', 0) + " km/h");
-            QString dProp =  ("Propulsion:         " + vehicle.propulsion);
-            QString dThre =  ("Threat Score:       " + QString::number(vehicle.threatScore, 'f', 0));
+            dAmp =           ("Amphibious:                  " + dAmp);
+            QString dUnm;
+            if (vehicle.isUnmanned) {
+                dUnm = "Yes";
+            } else {
+                dUnm = "No";
+            }
+            dUnm =           ("Unmanned (UxV):              " + dUnm);
+            QString dAct;
+            if (vehicle.hasActiveDefense) {
+                dAct = "Yes";
+            } else {
+                dAct = "No";
+            }
+            dAct =           ("Active defence:              " + dAct);
+            QString dFue =   ("Estimated fuel level:        " + QString::number(vehicle.fuelLevel, 'f', 1) + " %");
+            QString dAmm =   ("Estimated ammunition level:  " + QString::number(vehicle.ammunitionLevel, 'f', 1) + " %");
+            QString dMSpe =  ("Maximum speed:               " + QString::number(vehicle.maxSpeed, 'f', 0) + " km/h");
+            QString dSpe =   ("Speed:                       " + QString::number(vehicle.speed, 'f', 0) + " km/h");
+            QString dHea =   ("Heading:                     " + QString::number(vehicle.heading, 'f', 0) + "°");
+            QString dDist =  ("Distance to target:          " + QString::number(vehicle.distanceToTarget, 'f', 0) + " m");
+            QString dThre =  ("Threat score:                " + QString::number(vehicle.threatScore, 'f', 0));
             new QListWidgetItem(dCall, entityList);
             new QListWidgetItem(dTrack, entityList);
-            new QListWidgetItem(dPrio, entityList);
+            new QListWidgetItem(dTyp, entityList);
             new QListWidgetItem(dClas, entityList);
             new QListWidgetItem(dDom, entityList);
-            new QListWidgetItem(dTyp, entityList);
-            distanceItem->setText(dDist);
-            entityList->insertItem(7, distanceItem);
-            speedItem->setText(dSpe);
-            entityList->insertItem(8, speedItem);
-            headingItem->setText(dHea);
-            entityList->insertItem(9, headingItem);
+            new QListWidgetItem(dProp, entityList);
+            new QListWidgetItem(dPrio, entityList);
+            new QListWidgetItem(dProt, entityList);
+            new QListWidgetItem(dSat, entityList);
+            new QListWidgetItem(dAmp, entityList);
+            new QListWidgetItem(dUnm, entityList);
+            new QListWidgetItem(dAct, entityList);
             new QListWidgetItem(dFue, entityList);
             new QListWidgetItem(dAmm, entityList);
-            new QListWidgetItem(dUnm, entityList);
-            new QListWidgetItem(dSat, entityList);
-            new QListWidgetItem(dAct, entityList);
-            new QListWidgetItem(dAmp, entityList);
-            new QListWidgetItem(dProt, entityList);
             new QListWidgetItem(dMSpe, entityList);
-            new QListWidgetItem(dProp, entityList);
+            speedItem->setText(dSpe);
+            entityList->insertItem(16, speedItem);
+            headingItem->setText(dHea);
+            entityList->insertItem(17, headingItem);
+            distanceItem->setText(dDist);
+            entityList->insertItem(18, distanceItem);
             threatItem->setText(dThre);
             entityList->insertItem(19, threatItem);
 
@@ -1291,10 +1310,10 @@ void MainWindow::listItemDoubleclicked(QListWidgetItem *item) {
     connect(simTimer, &QTimer::timeout, entityDialog, [=]() {
         for (const auto &vehicleUpdate : tacticalVehicleDb->vehicles()) {
             if (vehicleUpdate.callsign == extractedCallsign && entityLiveUpdatesBox->isChecked()) {
-                distanceItem->setText("Distance to target: " +QString::number(vehicleUpdate.distanceToTarget, 'f', 0) + " m");
-                speedItem->setText   ("Speed:              " + QString::number(vehicleUpdate.speed, 'f', 0) + " km/h");
-                headingItem->setText ("Heading:            " + QString::number(vehicleUpdate.heading, 'f', 0) + "°");
-                threatItem->setText ("Threat Score:        " + QString::number(vehicleUpdate.threatScore, 'f', 0));
+                distanceItem->setText("Distance to target:          " + QString::number(vehicleUpdate.distanceToTarget, 'f', 0) + " m");
+                speedItem->setText   ("Speed:                       " + QString::number(vehicleUpdate.speed, 'f', 0) + " km/h");
+                headingItem->setText ("Heading:                     " + QString::number(vehicleUpdate.heading, 'f', 0) + "°");
+                threatItem->setText  ("Threat score:                " + QString::number(vehicleUpdate.threatScore, 'f', 0));
             }
         }
     });

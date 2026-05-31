@@ -14,6 +14,7 @@ class RangeSlider : public QWidget {
     Q_OBJECT
 
 public:
+    // --- Construction ---
     explicit RangeSlider(QWidget *parent = nullptr);
 
     // --- Configuration ---
@@ -25,11 +26,7 @@ public:
     int upperValue() const { return m_upperValue; }
 
 signals:
-    /**
-     * @brief Emitted when either handle position changes.
-     * @param min Current lower bound value
-     * @param max Current upper bound value
-     */
+    // --- Signals ---
     void valuesChanged(int min, int max);
 
 protected:

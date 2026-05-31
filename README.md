@@ -1,6 +1,6 @@
 # Tactical Vehicle Gateway (TVG)
 
-**Tactical Vehicle Gateway** is an C++/Qt situational awareness system for monitoring, filtering, sorting, and simulating tactical assets in real time. The application combines data persistence, deterministic kinematic simulation, and a modular UI suitable for operational and analytical contexts.
+**Tactical Vehicle Gateway** is a C++/Qt application for monitoring, filtering, sorting, and simulating tactical vehicles in real time. The application combines data persistence, kinematic simulation, and a modular UI suitable for operational and analytical use.
 
 ---
 
@@ -10,37 +10,37 @@
   Includes a custom `RangeSlider` widget implemented by inheriting from `QWidget` and overriding low-level event handlers (`paintEvent`, `mousePressEvent`, `mouseMoveEvent`) providing range-based input functionality not available in the standard Qt widget library.
 
 * **Data Management & Persistence**  
-  Uses `QJsonDocument` for deterministic JSON ingestion. The architecture follows a **master–derived view pattern**:
+  Uses `QJsonDocument` for JSON ingestion. The architecture follows a **master–derived view pattern**:
   * Primary data ownership in `std::deque<TacticalVehicle>`
   * Filtered views represented as `std::vector<const TacticalVehicle*>`  
-  This ensures memory safety, pointer stability, cache-friendly iteration, and no duplication of vehicle data.
+  This ensures pointer stability, cache-friendly iteration, and avoids duplication of vehicle data.
 
 * **Time-Stepped Simulation Engine**  
-  A timed simulation heartbeat (`QTimer`) updates vehicle kinematics and recalculates distances relative to a user-defined mission target. Simulation logic is isolated in the controller layer and uses vector mathematics, trigonometry (`std::cos`, `std::sin`), and Euclidean distance calculations. Derived threat score is computed during simulation update cycle.
+  A timed simulation heartbeat (`QTimer`) updates vehicle kinematics and recalculates distances relative to a user-defined mission target. Simulation logic is isolated in the controller layer and uses vector mathematics, trigonometry (`std::cos`, `std::sin`), and Euclidean distance calculations. Vehicle telemetry is updated during the simulation cycle, after which a derived threat score is recalculated.
 
 * **Algorithmic Efficiency & Sorting**  
   Sorting is implemented using static predicate functions and `std::sort`, supporting both pointer-based filtered views and in-place sorting of the master dataset. Assets can be ordered by:
   * Distance to target
-  * Fuel criticality
-  * Strategic priority
-  * Classification
   * Threat score
+  * Strategic priority
+  * Fuel criticality
+  * Classification
 
 ---
 
 ## 📡 Functional Capabilities
 
-### 1. Situational Awareness (SA)
+### 1. Vehicle Monitoring & Filtering
 
 * **Multi-Dimensional Filtering**  
-  A single-pass deterministic filter evaluates:
-  * Capability flags (SATCOM, Amphibious, Unmanned, Active Defense)
-  * Identity constraints (Callsign, Track ID)
-  * Strategic classification (Domain, Propulsion, Priority)
-  * Protection bounds (STANAG 4569 min/max)
-  * Telemetry ranges (Fuel %, Distance to target)
+  A single-pass filter evaluates:
+  * Capabilities (SATCOM Link, Amphibious, Unmanned (UxV), Active Defense)
+  * Identity (Callsign, Track ID)
   * Affiliation (Friendly, Hostile, Neutral, Unknown)
-
+  * Strategic classification (Operational Domain, Propulsion Type, Strategic Priority)
+  * Protection level (STANAG 4569 min/max)
+  * Telemetry (Estimated Fuel Level, Distance To Target)
+  
 * **Divergence-Based Filter Logic**  
   The system evaluates filter necessity by comparing the current result-set against the total dataset. If all vehicles match the criteria, the filtering state is treated as inactive to maintain UI consistency.
 
@@ -48,10 +48,10 @@
   Results are rendered in a monospaced layout and color-coded by affiliation:
   * Friendly → Blue
   * Hostile → Red
-  * Neutral / Unknown → White 
+  * Neutral / Unknown → Default text color
 
 * **Domain Standards Support**  
-  Includes data structures for STANAG 4569 protection levels (1–6) and provides structural identifiers for MIL-STD-2525 symbology mapping.
+  Includes support for STANAG 4569 protection levels (1–6) and stores MIL-STD-2525 / APP-6 compatible symbol identifiers.
 
 ---
 
@@ -72,16 +72,18 @@
 
 ## 🧭 Entity Data Visualization
 
-* **Per-Asset Dialogs**  
+* **Per-Vehicle Dialogs**  
   Double-clicking an asset opens a dedicated entity dialog displaying:
-  * Identity and classification
-  * Dynamic telemetry (distance, speed, heading)
-  * Capabilities and protection level
+  * Identity
+  * Strategic classification
+  * Capabilities
+  * Protection level
   * Fuel and ammunition estimates
+  * Dynamic telemetry
   * Threat score 
 
 * **Live Entity Telemetry**  
-  Entity dialogs can subscribe to live simulation updates independently of the main list, reflecting real-time kinematic changes and threat calculation without redundant computation.
+  Vehicle dialogs can subscribe to live simulation updates independently of the main list, reflecting real-time kinematic changes and threat calculation without redundant computation.
 
 ---
 
@@ -90,7 +92,7 @@
 The project is organized into decoupled layers of responsibility:
 
 * **`TacticalVehicle`**  
-  A lightweight data model encapsulating identity, classification, capabilities, and dynamic telemetry.
+  A lightweight data model encapsulating entity data.
 
 * **`TacticalVehicleData`**  
   The authoritative data store responsible for:

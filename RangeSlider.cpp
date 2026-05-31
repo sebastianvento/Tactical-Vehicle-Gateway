@@ -3,7 +3,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 
-// --- RangeSlider Implementation ---
+// --- RangeSlider ---
 // Implements custom painting, mouse interaction, and coordinate mapping
 
 // --- Construction ---
@@ -30,7 +30,8 @@ void RangeSlider::setRange(int min, int max) {
     m_lowerValue = qBound(m_minimumRange, m_lowerValue, m_maximumRange);
     m_upperValue = qBound(m_minimumRange, m_upperValue, m_maximumRange);
 
-    update(); // Trigger repaint
+    // Trigger repaint
+    update();
 }
 
 void RangeSlider::setValues(int min, int max) {
@@ -112,7 +113,8 @@ void RangeSlider::mouseReleaseEvent(QMouseEvent *event) {
 
 // --- Coordinate Mapping ---
 int RangeSlider::valueToPosition(int value) {
-    const int margin = 20; // Visual padding for handle radius
+    // Visual padding for handle radius
+    const int margin = 20;
 
     if (m_maximumRange <= m_minimumRange || width() <= 2 * margin) {
         return margin;

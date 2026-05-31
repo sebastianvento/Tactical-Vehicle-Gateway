@@ -5,21 +5,31 @@
 
 /**
  * @struct TacticalVehicle
- * @brief Represents a single tactical asset within the system.
+ * @brief Represents a single tactical vehicle within the system.
  *
- * Holds static identity and classification data, technical characteristics,
+ * Holds static capability identity and classification data, technical characteristics,
  * and dynamic telemetry used for simulation, filtering, and presentation.
  */
 struct TacticalVehicle {
-    // --- Identity Filters & Strategic Classification ---
+    // --- Capability ---
+    bool hasSatCom = false;         ///< Satellite communication capability
+    bool isAmphibious = false;      ///< Capable of water-based operations
+    bool isUnmanned = false;        ///< Unmanned / autonomous operation
+    bool hasActiveDefense = false;  ///< Active hard/soft-kill defense systems
+
+    // --- Identity ---
     QString callsign;               ///< Unique radio callsign (e.g. "Sabre 1-1")
     QString trackId;                ///< Unique system track identifier (e.g. "T-7201")
     QString type;                   ///< Specific vehicle model or designation
-    QString classification;         ///< Broad asset category
+
+    // --- Affiliation ---
     QString affiliation;            ///< Hostility status (Friendly, Hostile, Neutral, Unknown)
+
+    // --- Strategic Classification ---
+    QString classification;         ///< Asset category
+    QString domain;                 ///< Operational environment (Air, Electronic, Land, Sea, Space, Subsurface)
+    QString propulsion;             ///< Locomotion method (Aerial, Legged, Maritime, Tracked, Wheeled)
     QString priority;               ///< Strategic priority level (Flash, High, Routine, Low)
-    QString domain;                 ///< Operational environment (Land, Sea, Air, Subsurface, Space, Electronic)
-    QString propulsion;             ///< Locomotion method (Wheeled, Tracked, Legged, Aerial, Maritime)
     QString natoIcon;               ///< APP-6 / MIL-STD-2525 symbol identifier
 
     // --- Technical Specifications ---
@@ -27,23 +37,17 @@ struct TacticalVehicle {
     double maxSpeed = 0.0;          ///< Maximum rated speed (km/h)
     double targetSpeed = 0.0;       ///< Target speed for operative function (km/h)
 
-    // --- Capability Flags ---
-    bool hasSatCom = false;        ///< Satellite communication capability
-    bool isAmphibious = false;     ///< Capable of water-based operations
-    bool isUnmanned = false;       ///< Unmanned / autonomous operation
-    bool hasActiveDefense = false; ///< Active hard/soft-kill defense systems
-
     // --- Telemetry ---
-    double posX = 0.0;             ///< Cartesian X coordinate (meters)
-    double posY = 0.0;             ///< Cartesian Y coordinate (meters)
-    double heading = 0.0;          ///< Navigational heading (degrees, 0-359)
-    double speed = 0.0;            ///< Current speed (km/h)
-    double fuelLevel = 100.0;      ///< Remaining fuel percentage (0-100)
-    double ammunitionLevel = 100.0;///< Remaining ammunition percentage (0-100)
-    double distanceToTarget = 0.0; ///< Euclidean distance to mission target (meters)
+    double posX = 0.0;              ///< Cartesian X coordinate (meters)
+    double posY = 0.0;              ///< Cartesian Y coordinate (meters)
+    double heading = 0.0;           ///< Navigational heading (degrees, 0-359)
+    double speed = 0.0;             ///< Current speed (km/h)
+    double fuelLevel = 100.0;       ///< Remaining estimated fuel percentage (0-100)
+    double ammunitionLevel = 100.0; ///< Remaining estimated ammunition percentage (0-100)
+    double distanceToTarget = 0.0;  ///< Euclidean distance to mission target (meters)
 
     // --- Derived Metrics ---
-    double threatScore = 0.0;      ///< Computed score based on distance to target, speed, priority and affiliation
+    double threatScore = 0.0;       ///< Computed score based on distance to target, speed, priority and affiliation
 };
 
 #endif // TACTICALVEHICLE_H

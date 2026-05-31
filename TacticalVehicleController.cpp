@@ -4,11 +4,12 @@
 #include <cmath>
 #include <QRandomGenerator>
 
-/**
- * @brief Binds the controller to the shared TacticalVehicleData store.
- *
- * The controller operates purely on model data and owns no UI state.
- */
+// --- TacticalVehicleController ---
+// Applies filtering, maintains derived views,
+// advances simulation state, and computes threat metrics.
+// Operates exclusively on model data and remains UI-agnostic.
+
+// --- Construction ---
 TacticalVehicleController::TacticalVehicleController(TacticalVehicleData& data) : data(data) {
 }
 
@@ -24,8 +25,8 @@ void TacticalVehicleController::applyFilter(const FilterCriteria& criteria) {
     }
 }
 
-bool TacticalVehicleController::matches( const TacticalVehicle& vehicle, const FilterCriteria& criteria) const {
-    // Capability Flags
+bool TacticalVehicleController::matches(const TacticalVehicle& vehicle, const FilterCriteria& criteria) const {
+    // Capability
     if (criteria.hasSatCom && !vehicle.hasSatCom) return false;
     if (criteria.isAmphibious && !vehicle.isAmphibious) return false;
     if (criteria.isUnmanned && !vehicle.isUnmanned) return false;
@@ -35,24 +36,24 @@ bool TacticalVehicleController::matches( const TacticalVehicle& vehicle, const F
     if (criteria.callsignActive && vehicle.callsign != criteria.callsign) return false;
     if (criteria.trackIdActive && vehicle.trackId != criteria.trackId) return false;
 
+    // Affiliation
+    if (criteria.affiliation != "All Types" &&
+        vehicle.affiliation != criteria.affiliation) return false;
+
     // Strategic Classification
     if (criteria.domainActive && vehicle.domain != criteria.domain) return false;
     if (criteria.propulsionActive && vehicle.propulsion != criteria.propulsion) return false;
     if (criteria.priorityActive && vehicle.priority != criteria.priority) return false;
 
-    // Protection Constraints
+    // Protection
     if (criteria.protectionMinActive && vehicle.protectionLevel < criteria.protectionMin) return false;
     if (criteria.protectionMaxActive && vehicle.protectionLevel > criteria.protectionMax) return false;
 
-    // Telemetry Ranges
+    // Telemetry
     if (vehicle.fuelLevel < criteria.fuelMin) return false;
     if (vehicle.fuelLevel > criteria.fuelMax) return false;
     if (vehicle.distanceToTarget < criteria.distanceMin) return false;
     if (criteria.distanceMax < 10000 && vehicle.distanceToTarget > criteria.distanceMax) return false;
-
-    // Affiliation
-    if (criteria.affiliation != "All Types" &&
-        vehicle.affiliation != criteria.affiliation) return false;
 
     return true;
 }
@@ -67,19 +68,12 @@ int TacticalVehicleController::countMatches(const FilterCriteria& criteria) cons
     return count;
 }
 
-/**
- * @brief Indicates whether filtering affects the result set.
- *
- * Returns true when the filtered view size differs from the full dataset size.
- * This reflects result-based filtering, not user intent.
- */
 bool TacticalVehicleController::isFilterActive() const {
     return filteredVehicles.size() != data.vehicles().size();
 }
 
 // --- Simulation Logic ---
 // Advances vehicle positions and recalculates distances relative to the current mission target.
-
 // This function operates exclusively on model data and is
 // triggered externally by a timed heartbeat (QTimer).
 void TacticalVehicleController::updateSimulation(double targetX, double targetY) {
@@ -127,9 +121,7 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
         const double distPerSecond = v.speed / 3.6;
 
         // Integrate position
-        // xt+1​=xt​+d⋅cos(θ)
         v.posX += distPerSecond * std::cos(rad);
-        // yt+1​=yt​+d⋅sin(θ)
         v.posY += distPerSecond * std::sin(rad);
 
         // Update target-relative distance
@@ -139,11 +131,13 @@ void TacticalVehicleController::updateSimulation(double targetX, double targetY)
     }
 }
 
+// --- Threat Score Calculation ---
 void TacticalVehicleController::updateThreatScore() {
     for (auto& v : data.vehiclesMutable()) {
         // Normalize components to 0–1 and combine
-        double distanceFactor   = 1.0 - std::min(v.distanceToTarget / 20000.0, 1.0);
-        double speedFactor      = std::min(v.speed / v.maxSpeed, 1.0);
+        double distanceFactor = 1.0 - std::min(v.distanceToTarget / 20000.0, 1.0);
+        double speedFactor = 0.0;
+        if (v.maxSpeed > 0) speedFactor = std::min(v.speed / v.maxSpeed, 1.0);
 
         // Priority mapping
         double priorityFactor = 0.0;

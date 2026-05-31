@@ -17,18 +17,21 @@ struct TacticalVehicle;
  * Contains no behavior or validation.
  */
 struct FilterCriteria {
-    // --- Capability Flags ---
+    // --- Capability ---
     bool hasSatCom = false;
     bool isAmphibious = false;
     bool isUnmanned = false;
     bool hasActiveDefense = false;
 
-    // --- Identity Filters ---
+    // --- Identity ---
     bool callsignActive = false;
     QString callsign;
 
     bool trackIdActive = false;
     QString trackId;
+
+    // --- Affiliation ---
+    QString affiliation = "All Types";
 
     // --- Strategic Classification ---
     bool domainActive = false;
@@ -40,24 +43,19 @@ struct FilterCriteria {
     bool priorityActive = false;
     QString priority;
 
-    // --- Protection Constraints ---
+    // --- Protection ---
     bool protectionMinActive = false;
     int protectionMin = 0;
 
     bool protectionMaxActive = false;
     int protectionMax = 0;
 
-    // --- Telemetry Ranges ---
+    // --- Telemetry ---
     int fuelMin = 0;
     int fuelMax = 100;
-
-    // --- Distancy To Target ---
     // NOTE: distanceMax == 10000 is treated as "no upper bound" (UI convention).
     int distanceMin = 0;
     int distanceMax = 10000;
-
-    // --- Affiliation ---
-    QString affiliation = "All Types";
 };
 
 /**
@@ -65,12 +63,13 @@ struct FilterCriteria {
  * @brief Central domain controller for tactical vehicle processing.
  *
  * Evaluates filter criteria against the vehicle dataset, maintains
- * derived filtered views, and advances simulation state.
+ * derived filtered views, advances simulation state and computes threatscore.
  *
  * This class is UI-agnostic and operates purely on model data.
  */
 class TacticalVehicleController {
 public:
+    // --- Construction ---
     explicit TacticalVehicleController(TacticalVehicleData& data);
 
     // --- Filtering ---

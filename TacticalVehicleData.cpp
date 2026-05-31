@@ -6,7 +6,7 @@
 #include <QFile>
 #include <QDebug>
 
-// --- Tactical Vehicle Data Model ---
+// --- TacticalVehicleData ---
 // Owns the persistent tactical dataset and provides JSON ingestion,
 // controlled container access, and stateless sorting predicates.
 
@@ -17,14 +17,6 @@ TacticalVehicleData::TacticalVehicleData() {
 }
 
 // --- Data Ingestion ---
-/**
- * @brief Parses data from a JSON file and initializes internal containers.
- *
- * This function fully resets the internal dataset before loading to ensure
- * no stale or partially-loaded data remains.
- *
- * @param path The file system path or Qt resource path to the source JSON file.
- */
 void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -58,35 +50,41 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
         QJsonObject obj = value.toObject();
         TacticalVehicle v;
 
-        // Identity & Classification
-        v.callsign       = obj["callsign"].toString();
-        v.trackId        = obj["trackId"].toString();
-        v.type           = obj["type"].toString();
-        v.classification = obj["classification"].toString();
-        v.affiliation    = obj["affiliation"].toString();
-        v.priority       = obj["priority"].toString();
-        v.domain         = obj["domain"].toString();
-        v.propulsion     = obj["propulsion"].toString();
-        v.natoIcon       = obj["natoIcon"].toString();
-
-        // Capability Flags
+        // Capability
         v.hasSatCom        = obj["hasSatCom"].toBool();
         v.isAmphibious     = obj["isAmphibious"].toBool();
         v.isUnmanned       = obj["isUnmanned"].toBool();
         v.hasActiveDefense = obj["hasActiveDefense"].toBool();
 
-        // Telemetry & Performance Characteristics
+        // Identity
+        v.callsign       = obj["callsign"].toString();
+        v.trackId        = obj["trackId"].toString();
+        v.type           = obj["type"].toString();
+
+        // Affiliation
+        v.affiliation    = obj["affiliation"].toString();
+
+        // Strategic Classification
+        v.classification = obj["classification"].toString();
+        v.domain         = obj["domain"].toString();
+        v.propulsion     = obj["propulsion"].toString();
+        v.priority       = obj["priority"].toString();
+        v.natoIcon       = obj["natoIcon"].toString();
+
+        // Protection
         v.protectionLevel  = obj["protectionLevel"].toInt();
-        v.speed            = obj["speed"].toDouble();
+
+        // Telemetry & Performance Characteristics
         v.maxSpeed         = obj["maxSpeed"].toDouble();
+        v.speed            = obj["speed"].toDouble();
         v.targetSpeed      = obj["targetSpeed"].toDouble();
-        v.fuelLevel        = obj["fuelLevel"].toDouble();
-        v.ammunitionLevel  = obj["ammunitionLevel"].toDouble();
+        v.heading          = obj["heading"].toDouble();
         v.posX             = obj["posX"].toDouble();
         v.posY             = obj["posY"].toDouble();
-        v.heading          = obj["heading"].toDouble();
+        v.fuelLevel        = obj["fuelLevel"].toDouble();
+        v.ammunitionLevel  = obj["ammunitionLevel"].toDouble();
 
-        // Distance is dynamically updated by the simulation engine
+        // Distance To Target (dynamically updated by the simulation engine)
         v.distanceToTarget = 0.0;
 
         allVehicles.push_back(v);
@@ -96,22 +94,10 @@ void TacticalVehicleData::loadVehiclesFromJson(const QString &path) {
 }
 
 // --- Container Accessors ---
-/**
- * @brief Read-only access to the master vehicle container.
- *
- * Intended for UI rendering and non-mutating inspection.
- */
 const std::deque<TacticalVehicle>& TacticalVehicleData::vehicles() const {
     return allVehicles;
 }
 
-/**
- * @brief Mutable access to the vehicle container.
- *
- * Intended for controlled use cases such as:
- *  - Simulation updates
- *  - In-place sorting of the master dataset
- */
 std::deque<TacticalVehicle>& TacticalVehicleData::vehiclesMutable() {
     return allVehicles;
 }
@@ -125,12 +111,12 @@ bool TacticalVehicleData::sortByDistanceDesc(const TacticalVehicle* a, const Tac
     return a->distanceToTarget > b->distanceToTarget;
 }
 
-bool TacticalVehicleData::sortByFuelAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
-    return a->fuelLevel < b->fuelLevel;
+bool TacticalVehicleData::sortByThreatAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
+    return a->threatScore < b->threatScore;
 }
 
-bool TacticalVehicleData::sortByFuelDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
-    return a->fuelLevel > b->fuelLevel;
+bool TacticalVehicleData::sortByThreatDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
+    return a->threatScore > b->threatScore;
 }
 
 bool TacticalVehicleData::sortByPriorityAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
@@ -141,18 +127,18 @@ bool TacticalVehicleData::sortByPriorityDesc(const TacticalVehicle* a, const Tac
     return a->priority > b->priority;
 }
 
+bool TacticalVehicleData::sortByFuelAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
+    return a->fuelLevel < b->fuelLevel;
+}
+
+bool TacticalVehicleData::sortByFuelDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
+    return a->fuelLevel > b->fuelLevel;
+}
+
 bool TacticalVehicleData::sortByClassificationAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->classification < b->classification;
 }
 
 bool TacticalVehicleData::sortByClassificationDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
     return a->classification > b->classification;
-}
-
-bool TacticalVehicleData::sortByThreatAsc(const TacticalVehicle* a, const TacticalVehicle* b) {
-    return a->threatScore < b->threatScore;
-}
-
-bool TacticalVehicleData::sortByThreatDesc(const TacticalVehicle* a, const TacticalVehicle* b) {
-    return a->threatScore > b->threatScore;
 }

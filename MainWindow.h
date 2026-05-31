@@ -32,19 +32,20 @@ class MainWindow : public QWidget {
     Q_OBJECT
 
 public:
+    // --- Construction & Destrucion ---
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
     // --- Core Logic ---
     void displayButtonClicked();                       ///< Explicit trigger to apply filters and refresh displayed results
+    void filtersCleared();                             ///< Clears all filters
     FilterCriteria filterFunction() const;             ///< Resolves UI state and UI conventions into filter criteria
-    void filtersCleared();
+    void listItemDoubleClicked(QListWidgetItem *item); ///< Shows dialog with entity info when QListWidget item clicked
     void printList();                                  ///< Populates resultsList from current data view
     void updateDisplayButtonPreview();                 ///< Updates filtered vehicles preview count
-    void listItemDoubleclicked(QListWidgetItem *item); ///< Shows dialog with entity info when QListWidget item clicked
 
-    // --- Identity & Search Management ---
+    // --- Identity ---
     void callsignChanged(const QString& text);
     void callsignReturnPressed();
     void callsignSelectionPressed();
@@ -53,9 +54,10 @@ private slots:
     void trackIdReturnPressed();
     void trackIdSelectionPressed();
 
-    // --- Strategic Classification & Affiliation Menus ---
+    // --- Affiliation ---
     void affiliationActionClicked(QAction* action);
 
+    // --- Strategic Classification ---
     void domainActionClicked(QAction* action);
     void domainSelectionPressed();
 
@@ -65,12 +67,13 @@ private slots:
     void propulsionActionClicked(QAction* action);
     void propulsionSelectionPressed();
 
+    // --- Protection ---
     void protectionMenuMaxClicked(QAction* action);
     void protectionMenuMinClicked(QAction* action);
     void protectionSelectionMaxPressed();
     void protectionSelectionMinPressed();
 
-    // --- Telemetry & Input Control ---
+    // --- Telemetry ---
     void distanceInputMaxChanged(const QString& text);
     void distanceInputMinChanged(const QString& text);
     void distanceSliderChanged(int min, int max);
@@ -102,14 +105,14 @@ private:
     // --- Sort Modes ---
     enum class SortMode {
         None,
+        ClassificationAsc,
+        ClassificationDesc,
         DistanceAsc,
         DistanceDesc,
         FuelAsc,
         FuelDesc,
         PriorityAsc,
         PriorityDesc,
-        ClassificationAsc,
-        ClassificationDesc,
         ThreatAsc,
         ThreatDesc
     };
@@ -117,11 +120,11 @@ private:
     SortMode currentSortMode = SortMode::None;
 
     // --- Backend Data & Controllers ---
-    std::unique_ptr<TacticalVehicleData> tacticalVehicleDb;
     std::unique_ptr<TacticalVehicleController> controller;
+    std::unique_ptr<TacticalVehicleData> tacticalVehicleDb;
 
-    QStringList trackIdList;
     QStringList callsignList;
+    QStringList trackIdList;
 
     bool listUpdateGuard = false; ///< Guards explicit list rendering and update phases
 
@@ -141,11 +144,11 @@ private:
     int activeProtectionMin;
     int activeProtectionMax;
 
-    // --- Capability Flags ---
-    QCheckBox *cbHasActiveDefense;
+    // --- Capability ---
     QCheckBox *cbHasSatCom;
     QCheckBox *cbIsAmphibious;
     QCheckBox *cbIsUnmanned;
+    QCheckBox *cbHasActiveDefense;
 
     // --- Search & Auto-complete ---
     QLineEdit *callsignLine;
@@ -154,7 +157,31 @@ private:
     QLineEdit *trackIdLine;
     QCompleter *trackIdCompleter;
 
+    // --- Telemetry & Target Inputs ---
+    RangeSlider *fuelSlider;
+    QLineEdit *fuelInputMax;
+    QLineEdit *fuelInputMin;
+
+    RangeSlider *distanceSlider;
+    QLineEdit *distanceInputMax;
+    QLineEdit *distanceInputMin;
+
+    QLineEdit *targetXLine;
+    QLineEdit *targetYLine;
+
+    // --- Command & Feedback Controls ---
+    QPushButton *displayButton;
+    QPushButton *exitButton;
+    QPushButton *clearButton;
+    QCheckBox *liveUpdatesBox;
+    QPushButton *sortButton;
+
+    QIcon choiceDeletion;
+
     // --- Navigation & Menu Structures ---
+    QPushButton *affiliationButton;
+    QMenu *affiliationMenu;
+
     QPushButton *domainButton;
     QMenu *domainMenu;
 
@@ -169,30 +196,7 @@ private:
     QMenu *protectionMenuMax;
     QMenu *protectionMenuMin;
 
-    QPushButton *affiliationButton;
-    QMenu *affiliationMenu;
     QMenu *sortMenu;
-
-    // --- Telemetry & Target Inputs ---
-    RangeSlider *distanceSlider;
-    QLineEdit *distanceInputMax;
-    QLineEdit *distanceInputMin;
-
-    RangeSlider *fuelSlider;
-    QLineEdit *fuelInputMax;
-    QLineEdit *fuelInputMin;
-
-    QLineEdit *targetXLine;
-    QLineEdit *targetYLine;
-
-    // --- Command & Feedback Controls ---
-    QPushButton *displayButton;
-    QPushButton *exitButton;
-    QPushButton *sortButton;
-    QPushButton *clearButton;
-    QCheckBox *liveUpdatesBox;
-
-    QIcon choiceDeletion;
 
     // --- Selection / Tag Indicators ---
     QPushButton *callsignSelectionPressed_Btn;
@@ -212,7 +216,6 @@ private:
 
     // --- Timing & Helpers ---
     QTimer *simTimer;
-
 };
 
 #endif // MAINWINDOW_H
