@@ -19,7 +19,7 @@
   A timed simulation heartbeat (`QTimer`) updates vehicle kinematics and recalculates distances relative to a user-defined mission target. Simulation logic is isolated in the controller layer and uses vector mathematics, trigonometry (`std::cos`, `std::sin`), and Euclidean distance calculations. Vehicle telemetry is updated during the simulation cycle, after which a derived threat score is recalculated.
 
 * **Algorithmic Efficiency & Sorting**  
-  Sorting is implemented using static predicate functions and `std::sort`, supporting both pointer-based filtered views and in-place sorting of the master dataset. Assets can be ordered by:
+  Sorting is implemented using static predicate functions and `std::sort`, supporting both pointer-based filtered views and in-place sorting of the master dataset. Vehicles can be ordered by:
   * Distance to target
   * Threat score
   * Strategic priority
@@ -73,7 +73,7 @@
 ## 🧭 Entity Data Visualization
 
 * **Per-Vehicle Dialogs**  
-  Double-clicking an asset opens a dedicated entity dialog displaying:
+  Double-clicking an vehicle opens a dedicated entity dialog displaying:
   * Identity
   * Strategic classification
   * Capabilities
