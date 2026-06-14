@@ -14,7 +14,7 @@ struct TacticalVehicle {
     // --- Capability ---
     bool hasSatCom = false;         ///< Satellite communication capability
     bool isAmphibious = false;      ///< Capable of water-based operations
-    bool isUnmanned = false;        ///< Unmanned / autonomous operation
+    bool isUnmanned = false;        ///< Unmanned/autonomous operation
     bool hasActiveDefense = false;  ///< Active hard/soft-kill defense systems
 
     // --- Identity ---
