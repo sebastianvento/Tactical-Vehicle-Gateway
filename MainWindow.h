@@ -99,7 +99,7 @@ private slots:
     void sortByThreatDesc();
 
     // --- Simulation & Background Tasks ---
-    void onSimulationTick(); ///< Periodic update for dynamic asset data
+    void onSimulationTick(); ///< Periodic update for dynamic vehicle data
 
 private:
     // --- Sort Modes ---
