@@ -7,8 +7,8 @@
  * @struct TacticalVehicle
  * @brief Represents a single tactical vehicle within the system.
  *
- * Holds static capability identity and classification data, technical characteristics,
- * and dynamic telemetry used for simulation, filtering, and presentation.
+ * Holds static capability, identity, affiliation and classification data, technical specifications,
+ * dynamic telemetry and derived metrics used for simulation, filtering, and presentation.
  */
 struct TacticalVehicle {
     // --- Capability ---
